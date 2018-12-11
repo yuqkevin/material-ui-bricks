@@ -5,15 +5,14 @@ import Loadable from "react-loadable";
 import "./styles.css";
 
 function pickBrick(brickName) {
-  this.setState({ brick: <div>{brickName}</div> });
-  /** 
+  //this.setState({ brick: <div>{brickName}</div> });
+
   this.setState({
     brick: Loadable({
-      loader: () => import("./my-component"),
-      loading: () => <div>Loadding ...</div>
+      loader: () => import(`./bricks/${brickName}`),
+      loading: () => <div>Loadding {brickName} ...</div>
     })
   });
-  ***/
 }
 function Toc() {
   return (
@@ -28,34 +27,27 @@ function Toc() {
   );
 }
 function Container(props) {
-  return <div>{props.brick}</div>;
+  const MyBrick = props.brick;
+  return <MyBrick />;
 }
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      brick: (
+      brick: () => (
         <div>
           Hi there! <br />
-          <p>What brick do you want?</p>
+          <p>What brick do you want to pickup?</p>
         </div>
       )
     };
     pickBrick = pickBrick.bind(this);
   }
-  brickPicker(moduleName) {
-    this.setState({ brick: <div>{moduleName}</div> });
-    /**
-    return Loadable({
-      loader: () => import('./my-component'),
-      loading: () => <div>Loadding ...</div>,
-    });
-    **/
-  }
+
   render() {
     return (
       <div className="App">
-        <h1>Hello CodeSandbox</h1>
+        <h1>Material-UI Bricks</h1>
         <Toc />
         <Container brick={this.state.brick} />
       </div>
