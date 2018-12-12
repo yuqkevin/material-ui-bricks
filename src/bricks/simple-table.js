@@ -10,6 +10,8 @@
  *  header:
  *    title:  table title
  *    toolbar:  header right toolbar
+ *    highligth: false, contole
+ *    message:  ''
  *  table:
  *    header: column definitions
  *    data: data rows
@@ -39,10 +41,68 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import { lighten } from "@material-ui/core/styles/colorManipulator";
 
+// Sample data
+function sampleToolbar() {
+  return (
+    <div>
+      <Tooltip title="Filter list 1">
+        <IconButton aria-label="Filter list">
+          <FilterListIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Filter list 2">
+        <IconButton aria-label="Filter list">
+          <FilterListIcon />
+        </IconButton>
+      </Tooltip>
+    </div>
+  );
+}
+
+let sampleHeader = {
+  title: "Nutrition",
+  toolbar: sampleToolbar,
+  highlight: false
+};
+
 let counter = 0;
 function createData(name, calories, fat, carbs, protein) {
   counter += 1;
   return { id: counter, name, calories, fat, carbs, protein };
+}
+let sampeData = [
+  createData("Cupcake", 305, 3.7, 67, 4.3),
+  createData("Donut", 452, 25.0, 51, 4.9),
+  createData("Eclair", 262, 16.0, 24, 6.0),
+  createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
+  createData("Gingerbread", 356, 16.0, 49, 3.9),
+  createData("Honeycomb", 408, 3.2, 87, 6.5),
+  createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
+  createData("Jelly Bean", 375, 0.0, 94, 0.0),
+  createData("KitKat", 518, 26.0, 65, 7.0),
+  createData("Lollipop", 392, 0.2, 98, 0.0),
+  createData("Marshmallow", 318, 0, 81, 2.0),
+  createData("Nougat", 360, 19.0, 9, 37.0),
+  createData("Oreo", 437, 18.0, 63, 4.0)
+];
+
+let sampleRows = [
+  {
+    id: "name",
+    numeric: false,
+    disablePadding: true,
+    label: "Dessert (100g serving)"
+  },
+  { id: "calories", numeric: true, disablePadding: false, label: "Calories" },
+  { id: "fat", numeric: true, disablePadding: false, label: "Fat (g)" },
+  { id: "carbs", numeric: true, disablePadding: false, label: "Carbs (g)" },
+  { id: "protein", numeric: true, disablePadding: false, label: "Protein (g)" }
+];
+
+// end of sample data
+
+function toggleHighlight() {
+  this.setState({ highlight: !this.state.highlight });
 }
 
 function desc(a, b, orderBy) {
@@ -71,25 +131,12 @@ function getSorting(order, orderBy) {
     : (a, b) => -desc(a, b, orderBy);
 }
 
-const rows = [
-  {
-    id: "name",
-    numeric: false,
-    disablePadding: true,
-    label: "Dessert (100g serving)"
-  },
-  { id: "calories", numeric: true, disablePadding: false, label: "Calories" },
-  { id: "fat", numeric: true, disablePadding: false, label: "Fat (g)" },
-  { id: "carbs", numeric: true, disablePadding: false, label: "Carbs (g)" },
-  { id: "protein", numeric: true, disablePadding: false, label: "Protein (g)" }
-];
-
 class EnhancedTableHead extends React.Component {
   createSortHandler = property => event => {
     this.props.onRequestSort(event, property);
   };
-
   render() {
+    const rows = this.props.column || sampleRows;
     const {
       onSelectAllClick,
       order,
@@ -161,51 +208,51 @@ const toolbarStyles = theme => ({
           color: theme.palette.text.primary,
           backgroundColor: theme.palette.secondary.dark
         },
-  spacer: {
-    flex: "1 1 100%"
-  },
   actions: {
+    textAlign: "right",
+    flex: "1 1 100%",
     color: theme.palette.text.secondary
   },
   title: {
     flex: "0 0 auto"
+  },
+  message: {
+    float: "left",
+    paddingLeft: "2em",
+    paddingTop: "1em"
   }
 });
 
 let EnhancedTableToolbar = props => {
-  const { numSelected, classes } = props;
+  const { numSelected, classes, header } = props;
 
   return (
-    <Toolbar
-      className={classNames(classes.root, {
-        [classes.highlight]: numSelected > 0
-      })}
-    >
+    <Toolbar className={header.highlight ? classes.highlight : classes.default}>
       <div className={classes.title}>
-        {numSelected > 0 ? (
-          <Typography color="inherit" variant="subtitle1">
-            {numSelected} selected
-          </Typography>
-        ) : (
-          <Typography variant="h6" id="tableTitle">
-            Nutrition
-          </Typography>
-        )}
+        <Typography variant="h6" id="tableTitle">
+          {props.header.title}
+        </Typography>
       </div>
-      <div className={classes.spacer} />
       <div className={classes.actions}>
-        {numSelected > 0 ? (
-          <Tooltip title="Delete">
-            <IconButton aria-label="Delete">
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
+        {header.highlight ? (
+          <div>
+            {header.message && (
+              <Typography
+                color="inherit"
+                variant="subtitle1"
+                className={classes.message}
+              >
+                {header.message}
+              </Typography>
+            )}
+            <Tooltip title="Delete">
+              <IconButton aria-label="Delete">
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          </div>
         ) : (
-          <Tooltip title="Filter list">
-            <IconButton aria-label="Filter list">
-              <FilterListIcon />
-            </IconButton>
-          </Tooltip>
+          header.toolbar()
         )}
       </div>
     </Toolbar>
@@ -214,7 +261,8 @@ let EnhancedTableToolbar = props => {
 
 EnhancedTableToolbar.propTypes = {
   classes: PropTypes.object.isRequired,
-  numSelected: PropTypes.number.isRequired
+  numSelected: PropTypes.number.isRequired,
+  toolbar: PropTypes.object
 };
 
 EnhancedTableToolbar = withStyles(toolbarStyles)(EnhancedTableToolbar);
@@ -233,28 +281,19 @@ const styles = theme => ({
 });
 
 class EnhancedTable extends React.Component {
-  state = {
-    order: "asc",
-    orderBy: "calories",
-    selected: [],
-    data: [
-      createData("Cupcake", 305, 3.7, 67, 4.3),
-      createData("Donut", 452, 25.0, 51, 4.9),
-      createData("Eclair", 262, 16.0, 24, 6.0),
-      createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
-      createData("Gingerbread", 356, 16.0, 49, 3.9),
-      createData("Honeycomb", 408, 3.2, 87, 6.5),
-      createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
-      createData("Jelly Bean", 375, 0.0, 94, 0.0),
-      createData("KitKat", 518, 26.0, 65, 7.0),
-      createData("Lollipop", 392, 0.2, 98, 0.0),
-      createData("Marshmallow", 318, 0, 81, 2.0),
-      createData("Nougat", 360, 19.0, 9, 37.0),
-      createData("Oreo", 437, 18.0, 63, 4.0)
-    ],
-    page: 0,
-    rowsPerPage: 5
-  };
+  constructor(props) {
+    super(props);
+    toggleHighlight = toggleHighlight.bind(this);
+    this.state = {
+      hightlight: false,
+      order: "asc",
+      orderBy: "calories",
+      selected: [],
+      data: props.data || sampeData,
+      page: 0,
+      rowsPerPage: 5
+    };
+  }
 
   handleRequestSort = (event, property) => {
     const orderBy = property;
@@ -269,10 +308,14 @@ class EnhancedTable extends React.Component {
 
   handleSelectAllClick = event => {
     if (event.target.checked) {
-      this.setState(state => ({ selected: state.data.map(n => n.id) }));
+      this.setState(state => ({
+        selected: state.data.map(n => n.id),
+        message: `${state.data.length} selected`,
+        highlight: true
+      }));
       return;
     }
-    this.setState({ selected: [] });
+    this.setState({ selected: [], message: "", highlight: false });
   };
 
   handleClick = (event, id) => {
@@ -292,8 +335,13 @@ class EnhancedTable extends React.Component {
         selected.slice(selectedIndex + 1)
       );
     }
-
-    this.setState({ selected: newSelected });
+    let message =
+      newSelected.length > 0 ? `${newSelected.length} selected` : "";
+    this.setState({
+      selected: newSelected,
+      highlight: newSelected.length > 0 ? true : false,
+      message: message
+    });
   };
 
   handleChangePage = (event, page) => {
@@ -311,10 +359,16 @@ class EnhancedTable extends React.Component {
     const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
     const emptyRows =
       rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
-
+    const myHeader = Object.assign(header || sampleHeader, {
+      highlight: this.state.highlight,
+      message: this.state.message
+    });
     return (
       <Paper className={classes.root}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          header={header || sampleHeader}
+        />
         <div className={classes.tableWrapper}>
           <Table className={classes.table} aria-labelledby="tableTitle">
             <EnhancedTableHead
