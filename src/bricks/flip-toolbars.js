@@ -1,19 +1,18 @@
 /**
-Toolbars
-  - name: default
-    elements:
-      - type
-      - title:
-      - icon
-      - handlers:
-        - name
-        - handler
-        - args
-  - name: toolbar 1
-    toolbar: <Toolbar1 />
-  - name: toolbar 2
-    toolbar: <Toolbar2 />
-  - ...
+* input:
+*    selectedToolbar: 0-<length_of_toolbars>
+*    handlers:
+*    toolbars:
+*      - name: default
+*        elements:
+*          - type
+*            title:
+*            icon
+*            handlers:
+*              - name
+*                handler
+*                args
+ 
 
 events
   - name: to_toolbar1
@@ -198,11 +197,15 @@ class FlipToolBars extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedToolbar: 0,
+      selectedToolbar: props.selectedToolbar ? props.selectedToolbar : 0,
       selectedRows: 0
     };
+    // using passed handler first
+    let parentHandlers = props.handlers || {};
     this.handlers = {
-      flipTo: handlers.flipTo.bind(this)
+      flipTo: parentHandlers.flipTo
+        ? parentHandlers.flipTo.bind
+        : handlers.flipTo.bind(this)
     };
   }
 
