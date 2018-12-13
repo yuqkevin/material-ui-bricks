@@ -1,9 +1,14 @@
 /**
 Toolbars
   - name: default
-    toolbar: <ToolbarDefault />
-      icon:
-      handler:
+    elements:
+      - type
+      - title:
+      - icon
+      - handlers:
+        - name
+        - handler
+        - args
   - name: toolbar 1
     toolbar: <Toolbar1 />
   - name: toolbar 2
@@ -107,6 +112,8 @@ const sampleToolbars = [
     ]
   }
 ];
+const sampleParms = { selectedRows: 2 };
+// end of sample data
 
 const handlers = {
   flipTo: function(idx) {
@@ -117,7 +124,7 @@ const handlers = {
 function TextInToolbar(props) {
   return (
     <Typography color="inherit" variant="subtitle1">
-      {props.message}
+      {props.content}
     </Typography>
   );
 }
@@ -225,7 +232,7 @@ class FlipToolBars extends React.Component {
           toolbar={myToolbars[this.state.selectedToolbar]}
           pos={this.state.selectedToolbar}
           handlers={this.handlers}
-          params={this.props.params || {}}
+          params={this.props.params || sampleParms}
         />
       </Wrapper>
     );
@@ -234,6 +241,7 @@ class FlipToolBars extends React.Component {
 FlipToolBars.propTypes = {
   classes: PropTypes.object.isRequired,
   toolbars: PropTypes.array,
-  wrapper: PropTypes.string
+  wrapper: PropTypes.string,
+  params: PropTypes.object
 };
 export default withStyles(styles)(FlipToolBars);
