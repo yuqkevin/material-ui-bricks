@@ -123,9 +123,9 @@ const handlers = {
 
 function TextInToolbar(props) {
   return (
-    <Typography color="inherit" variant="subtitle1">
+    <span color="inherit" variant="subtitle1" style={{ paddingRight: "1em" }}>
       {props.content}
-    </Typography>
+    </span>
   );
 }
 function IconButtonInToolbar(props) {
@@ -179,31 +179,19 @@ function SelectedToolbar(props) {
 
 const styles = theme => ({
   root: {
-    paddingRight: theme.spacing.unit
+    paddingRight: theme.spacing.unit,
+    flex: "1 1 100%",
+    justifyContent: "flex-end",
+    color: theme.palette.text.secondary
   },
   highlight:
     theme.palette.type === "light"
       ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85)
+          color: theme.palette.secondary.main
         }
       : {
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark
-        },
-  actions: {
-    textAlign: "right",
-    flex: "1 1 100%",
-    color: theme.palette.text.secondary
-  },
-  title: {
-    flex: "0 0 auto"
-  },
-  message: {
-    float: "left",
-    paddingLeft: "2em",
-    paddingTop: "1em"
-  }
+          color: theme.palette.text.primary
+        }
 });
 
 class FlipToolBars extends React.Component {
@@ -224,7 +212,7 @@ class FlipToolBars extends React.Component {
     const Wrapper = wrapper || Toolbar;
     return (
       <Wrapper
-        className={classNames(classes.actions, {
+        className={classNames(classes.root, {
           [classes.highlight]: this.state.selectedToolbar > 0
         })}
       >
