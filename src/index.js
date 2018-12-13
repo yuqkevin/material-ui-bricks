@@ -1,6 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import Loadable from "react-loadable";
+import Button from "@material-ui/core/Button";
+import Paper from "@material-ui/core/Paper";
+import Typography from "@material-ui/core/Typography";
 
 import "./styles.css";
 
@@ -23,17 +26,17 @@ function pickBrick(brickName) {
 }
 function Toc() {
   return (
-    <ul className="Toc">
-      <li onClick={() => pickBrick("simple-tabs")}>
-        <span>Simple Tabs</span>
-      </li>
-      <li onClick={() => pickBrick("flip-toolbars")}>
-        <span>Flip Toolbars</span>
-      </li>
-      <li onClick={() => pickBrick("simple-table")}>
-        <span>Simple Table</span>
-      </li>
-    </ul>
+    <div>
+      <Button size="small" onClick={() => pickBrick("simple-tabs")}>
+        Simple Tabs
+      </Button>
+      <Button size="small" onClick={() => pickBrick("flip-toolbars")}>
+        Flip Toolbars
+      </Button>
+      <Button size="small" onClick={() => pickBrick("simple-table")}>
+        Simple Table
+      </Button>
+    </div>
   );
 }
 function Container(props) {
@@ -46,10 +49,15 @@ class App extends React.Component {
     this.state = {
       bricks: [],
       brick: () => (
-        <div>
-          Hi there! <br />
-          <p>What brick do you want to pickup?</p>
-        </div>
+        <Typography>
+          <img
+            alt="brick-logo"
+            height={300}
+            src={
+              "https://uploads.codesandbox.io/uploads/user/eb5600f7-ac63-46e4-98a2-3c1eea7b23a8/tePI-Screen%20Shot%202018-12-13%20at%201.11.19%20PM.png"
+            }
+          />
+        </Typography>
       )
     };
     pickBrick = pickBrick.bind(this);
@@ -60,7 +68,10 @@ class App extends React.Component {
       <div className="App">
         <h1>Material-UI Bricks</h1>
         <Toc />
-        <Container brick={this.state.brick} />
+        <div style={{ flex: "1 1 100%", height: "1em" }} />
+        <Paper>
+          <Container brick={this.state.brick} />
+        </Paper>
       </div>
     );
   }

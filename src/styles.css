@@ -2,14 +2,6 @@
   font-family: sans-serif;
   text-align: center;
 }
-.Toc {
-  list-style-type: none;
-  text-align: left;
-}
-.Toc > li > span {
-  margin-top: 0.5em;
-  cursor: pointer;
-}
-.Toc > li > span:hover {
-  text-decoration: underline;
-}
+.spacer: {
+    flex: 1 1 100%,
+},
