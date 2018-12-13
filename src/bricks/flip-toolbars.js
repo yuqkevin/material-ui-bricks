@@ -45,7 +45,8 @@ const sampleToolbars = [
         handlers: [
           {
             name: "onClick",
-            handler: () => flipTo(1)
+            handler: "flipTo",
+            args: [1]
           }
         ]
       },
@@ -56,7 +57,8 @@ const sampleToolbars = [
         handlers: [
           {
             name: "onClick",
-            handler: () => flipTo(1)
+            handler: "flipTo",
+            args: [1]
           }
         ]
       }
@@ -71,7 +73,8 @@ const sampleToolbars = [
         handlers: [
           {
             name: "onClick",
-            handler: () => flipTo(0)
+            handler: "flipTo",
+            args: [0]
           }
         ]
       },
@@ -82,7 +85,8 @@ const sampleToolbars = [
         handlers: [
           {
             name: "onClick",
-            handler: () => flipTo(0)
+            handler: "flipTo",
+            args: [0]
           }
         ]
       },
@@ -93,7 +97,10 @@ const sampleToolbars = [
         handlers: [
           {
             name: "onClick",
-            handler: () => flipTo(0)
+            handler: function() {
+              alert("trigger customer handler and call built-in handler");
+              this.handlers.flipTo(0);
+            }
           }
         ]
       }
@@ -101,10 +108,11 @@ const sampleToolbars = [
   }
 ];
 
-function flipTo(idx) {
-  console.log(name);
-  this.setState({ selectedToolbar: 1 });
-}
+const handlers = {
+  flipTo: function(idx) {
+    this.setState({ selectedToolbar: idx });
+  }
+};
 
 function TextInToolbar(props) {
   return (
@@ -116,13 +124,17 @@ function TextInToolbar(props) {
 function IconButtonInToolbar(props) {
   let item = props.button;
   let opts = {};
+  //const handlers = props.handlers
   if (item.handlers) {
     item.handlers.map(evt => {
-      opts[evt.name] = evt.handler;
+      if (typeof evt.handler === "string") {
+        opts[evt.name] = () => props.handlers[evt.handler](evt.args);
+      } else if (typeof evt.handler === "function") {
+        opts[evt.name] = evt.handler.bind(props);
+      }
       return true;
     });
   }
-  flipTo = props.flipTo;
   return (
     <Tooltip title={item.title}>
       <IconButton aria-label={item.title} {...opts}>
@@ -131,9 +143,9 @@ function IconButtonInToolbar(props) {
     </Tooltip>
   );
 }
+
 function SelectedToolbar(props) {
   const toolbar = props.toolbar;
-  const flipToolbarHandler = props.flipToolbarHandler;
   return (
     <div>
       {toolbar.elements.map((item, idx) => {
@@ -142,8 +154,8 @@ function SelectedToolbar(props) {
           case "icon-button":
             return (
               <IconButtonInToolbar
-                flipTo={flipToolbarHandler}
                 button={item}
+                handlers={props.handlers}
                 key={key}
               />
             );
@@ -194,12 +206,11 @@ class FlipToolBars extends React.Component {
       selectedToolbar: 0,
       selectedRows: 0
     };
-    //flipTo = flipTo.bind(this);
+    this.handlers = {
+      flipTo: handlers.flipTo.bind(this)
+    };
   }
 
-  flipToolbarHandler = idx => {
-    this.setState({ selectedToolbar: idx });
-  };
   render() {
     const { classes, toolbars, wrapper } = this.props;
     const myToolbars = toolbars || sampleToolbars;
@@ -212,8 +223,8 @@ class FlipToolBars extends React.Component {
       >
         <SelectedToolbar
           toolbar={myToolbars[this.state.selectedToolbar]}
-          flipToolbarHandler={this.flipToolbarHandler}
           pos={this.state.selectedToolbar}
+          handlers={this.handlers}
           params={this.props.params || {}}
         />
       </Wrapper>
