@@ -1,17 +1,18 @@
 /**
- * input:
- *    selectedToolbar: 0-<length_of_toolbars>
- *    handlers:
- *    toolbars:
+ * Brick Props:
+ *    wrapper    Wrapper of Brick, default is Toolbar, can be any React element of HTML DOM
+ *    initState  initial state of Brick from parent
+ *    handlers   array of handler functions
+ *    toolbars:  array of toolbar definition
  *      - name: default
  *        elements:
  *          - type
  *            title:
- *            icon
+ *            icon            optional, for iconButton only
  *            handlers:
- *              - name
- *                handler
- *                args
+ *              - trigger     e.g. "onClick"
+ *                handler     name in string if defined in handlers, otherwise should be an non-arrow function
+ *                args        optional, for directly function call only.
  **/
 
 import React from "react";
@@ -118,7 +119,10 @@ const sampleHandlers = [
     }
   },
   function sayHi(evt, props) {
-    this.setState({ message: `Hi ${props.button.title} !`, selectedRows: 5 });
+    this.setState({
+      message: `Hi ${props.button.title}!, 5 rows have been selected.`,
+      selectedRows: 5
+    });
   },
   function alertFlip(evt, props) {
     alert("trigger customer handler and call built-in handler");
