@@ -41,36 +41,15 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import { lighten } from "@material-ui/core/styles/colorManipulator";
 
+import FlipToolBars from "./flip-toolbars";
+
 // Sample data
-function sampleToolbar() {
-  return (
-    <div>
-      <Tooltip title="Filter list 1">
-        <IconButton aria-label="Filter list">
-          <FilterListIcon />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Filter list 2">
-        <IconButton aria-label="Filter list">
-          <FilterListIcon />
-        </IconButton>
-      </Tooltip>
-    </div>
-  );
-}
-
-let sampleHeader = {
-  title: "Nutrition",
-  toolbar: sampleToolbar,
-  highlight: false
-};
-
 let counter = 0;
 function createData(name, calories, fat, carbs, protein) {
   counter += 1;
   return { id: counter, name, calories, fat, carbs, protein };
 }
-let sampeData = [
+let sampleRows = [
   createData("Cupcake", 305, 3.7, 67, 4.3),
   createData("Donut", 452, 25.0, 51, 4.9),
   createData("Eclair", 262, 16.0, 24, 6.0),
@@ -86,7 +65,7 @@ let sampeData = [
   createData("Oreo", 437, 18.0, 63, 4.0)
 ];
 
-let sampleRows = [
+let sampleColumns = [
   {
     id: "name",
     numeric: false,
@@ -98,6 +77,63 @@ let sampleRows = [
   { id: "carbs", numeric: true, disablePadding: false, label: "Carbs (g)" },
   { id: "protein", numeric: true, disablePadding: false, label: "Protein (g)" }
 ];
+
+const sampleData = {
+  title: "Simple Table",
+  columns: sampleColumns,
+  rows: sampleRows
+};
+// Definition
+const DEFINITION = {
+  selectedToolbar: 0,
+  toolbars: [
+    {
+      name: "default",
+      elements: [
+        {
+          type: "icon-button",
+          title: "Filters",
+          icon: <FilterListIcon />,
+          handlers: [
+            {
+              name: "onClick",
+              handler: "flipTo",
+              args: [1]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      name: "deletion",
+      elements: [
+        {
+          type: "dynamic-text",
+          content: params => `${params.selectedRows} rows selected`,
+          handlers: [
+            {
+              name: "onClick",
+              handler: "flipTo",
+              args: [0]
+            }
+          ]
+        },
+        {
+          type: "icon-button",
+          title: "Delete",
+          icon: <DeleteIcon />,
+          handlers: [
+            {
+              name: "onClick",
+              handler: "flipTo",
+              args: [0]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
 
 // end of sample data
 
@@ -225,7 +261,7 @@ const toolbarStyles = theme => ({
 
 let EnhancedTableToolbar = props => {
   const { numSelected, classes, header } = props;
-
+  const myToolbars = props.toolbars || DEFINITION.toolbars;
   return (
     <Toolbar className={header.highlight ? classes.highlight : classes.default}>
       <div className={classes.title}>
@@ -233,28 +269,7 @@ let EnhancedTableToolbar = props => {
           {props.header.title}
         </Typography>
       </div>
-      <div className={classes.actions}>
-        {header.highlight ? (
-          <div>
-            {header.message && (
-              <Typography
-                color="inherit"
-                variant="subtitle1"
-                className={classes.message}
-              >
-                {header.message}
-              </Typography>
-            )}
-            <Tooltip title="Delete">
-              <IconButton aria-label="Delete">
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
-          </div>
-        ) : (
-          header.toolbar()
-        )}
-      </div>
+      <FlipToolBars className={classes.actions} toolbars={myToolbars} />
     </Toolbar>
   );
 };
@@ -355,11 +370,11 @@ class EnhancedTable extends React.Component {
   isSelected = id => this.state.selected.indexOf(id) !== -1;
 
   render() {
-    const { classes, header, table } = this.props;
+    const { classes, definition } = this.props;
     const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
     const emptyRows =
       rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
-    const myHeader = Object.assign(header || sampleHeader, {
+    const myHeader = Object.assign(definition.header || sampleHeader, {
       highlight: this.state.highlight,
       message: this.state.message
     });
@@ -437,6 +452,7 @@ class EnhancedTable extends React.Component {
 
 EnhancedTable.propTypes = {
   classes: PropTypes.object.isRequired,
+  definition: PropTypes.object,
   header: PropTypes.object,
   table: PropTypes.object
 };

@@ -1,28 +1,18 @@
 /**
-* input:
-*    selectedToolbar: 0-<length_of_toolbars>
-*    handlers:
-*    toolbars:
-*      - name: default
-*        elements:
-*          - type
-*            title:
-*            icon
-*            handlers:
-*              - name
-*                handler
-*                args
- 
-
-events
-  - name: to_toolbar1
-    handler: <handler function>
-  - name: to_toolbar2
-    handler: <handler function>
-  - name: to_toolbar3
-    handler: <handler function>
-  ...
-  **/
+ * input:
+ *    selectedToolbar: 0-<length_of_toolbars>
+ *    handlers:
+ *    toolbars:
+ *      - name: default
+ *        elements:
+ *          - type
+ *            title:
+ *            icon
+ *            handlers:
+ *              - name
+ *                handler
+ *                args
+ **/
 
 import React from "react";
 import classNames from "classnames";
@@ -43,14 +33,17 @@ const sampleToolbars = [
     name: "default",
     elements: [
       {
+        type: "dynamic-text",
+        content: params => `${params.message || ""}`
+      },
+      {
         type: "icon-button",
         icon: <FilterListIcon />,
-        title: "To Delete",
-        handlers: [
+        title: "Select Rows",
+        events: [
           {
-            name: "onClick",
-            handler: "flipTo",
-            args: [1]
+            trigger: "onClick",
+            handler: "sayHi"
           }
         ]
       },
@@ -58,9 +51,9 @@ const sampleToolbars = [
         type: "icon-button",
         icon: <DeleteIcon />,
         title: "Delete",
-        handlers: [
+        events: [
           {
-            name: "onClick",
+            trigger: "onClick",
             handler: "flipTo",
             args: [1]
           }
@@ -74,9 +67,9 @@ const sampleToolbars = [
       {
         type: "dynamic-text",
         content: params => `${params.selectedRows} rows selected`,
-        handlers: [
+        events: [
           {
-            name: "onClick",
+            trigger: "onClick",
             handler: "flipTo",
             args: [0]
           }
@@ -86,9 +79,9 @@ const sampleToolbars = [
         type: "icon-button",
         icon: <DeleteIcon />,
         title: "Delete",
-        handlers: [
+        events: [
           {
-            name: "onClick",
+            trigger: "onClick",
             handler: "flipTo",
             args: [0]
           }
@@ -98,25 +91,54 @@ const sampleToolbars = [
         type: "icon-button",
         icon: <BorderColorIcon />,
         title: "Edit content",
-        handlers: [
+        events: [
           {
-            name: "onClick",
-            handler: function() {
-              alert("trigger customer handler and call built-in handler");
-              this.handlers.flipTo(0);
-            }
+            trigger: "onClick",
+            handler: "alertFlip"
           }
         ]
       }
     ]
   }
 ];
-const sampleParms = { selectedRows: 2 };
+const sampleHandlers = [
+  function flipTo(idx) {
+    if (idx === 1) {
+      if (this.state.selectedRows === 0) {
+        this.setState({ message: "No row selected" });
+      } else {
+        this.setState({ selectedToolbar: idx });
+      }
+    } else {
+      this.setState({
+        selectedToolbar: idx,
+        selectedRows: 0,
+        message: `Thanks #${this.state.selectedToolbar}!`
+      });
+    }
+  },
+  function sayHi(evt, props) {
+    this.setState({ message: `Hi ${props.button.title} !`, selectedRows: 5 });
+  },
+  function alertFlip(evt, props) {
+    alert("trigger customer handler and call built-in handler");
+    this.handlers.flipTo(0);
+  }
+];
+const sampleStates = {
+  selectedRows: 0,
+  selectedToolbar: 0,
+  message: ""
+};
 // end of sample data
 
-const handlers = {
-  flipTo: function(idx) {
-    this.setState({ selectedToolbar: idx });
+// Definition
+const DEFINITION = {
+  default: {
+    toolbars: sampleToolbars,
+    wrapper: Toolbar, // to use HTML DOM as wrapper, it can be string like "div",
+    handlers: sampleHandlers,
+    states: sampleStates
   }
 };
 
@@ -131,12 +153,17 @@ function IconButtonInToolbar(props) {
   let item = props.button;
   let opts = {};
   //const handlers = props.handlers
-  if (item.handlers) {
-    item.handlers.map(evt => {
+  if (item.events) {
+    item.events.map(evt => {
       if (typeof evt.handler === "string") {
-        opts[evt.name] = () => props.handlers[evt.handler](evt.args);
+        if (typeof evt.args === "object") {
+          opts[evt.trigger] = () =>
+            props.handlers[evt.handler].apply(this, evt.args);
+        } else {
+          opts[evt.trigger] = e => props.handlers[evt.handler](e, props);
+        }
       } else if (typeof evt.handler === "function") {
-        opts[evt.name] = evt.handler.bind(props);
+        opts[evt.trigger] = evt.handler.bind(props);
       }
       return true;
     });
@@ -193,26 +220,21 @@ const styles = theme => ({
         }
 });
 
-class FlipToolBars extends React.Component {
+class Brick extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      selectedToolbar: props.selectedToolbar ? props.selectedToolbar : 0,
-      selectedRows: 0
-    };
-    // using passed handler first
-    let parentHandlers = props.handlers || {};
-    this.handlers = {
-      flipTo: parentHandlers.flipTo
-        ? parentHandlers.flipTo.bind
-        : handlers.flipTo.bind(this)
-    };
+    this.handlers = {};
+    let handlers = [...DEFINITION.default.handlers, ...(props.handlers || [])];
+    handlers.map(f => (this.handlers[f.name] = f.bind(this)));
+    this.state = Object.assign(
+      DEFINITION.default.states,
+      props.initState || {}
+    );
   }
 
   render() {
-    const { classes, toolbars, wrapper } = this.props;
-    const myToolbars = toolbars || sampleToolbars;
-    const Wrapper = wrapper || Toolbar;
+    const { classes, wrapper, toolbars } = this.props;
+    const Wrapper = wrapper;
     return (
       <Wrapper
         className={classNames(classes.root, {
@@ -220,19 +242,24 @@ class FlipToolBars extends React.Component {
         })}
       >
         <SelectedToolbar
-          toolbar={myToolbars[this.state.selectedToolbar]}
+          toolbar={toolbars[this.state.selectedToolbar]}
           pos={this.state.selectedToolbar}
           handlers={this.handlers}
-          params={this.props.params || sampleParms}
+          params={this.state}
         />
       </Wrapper>
     );
   }
 }
-FlipToolBars.propTypes = {
-  classes: PropTypes.object.isRequired,
-  toolbars: PropTypes.array,
-  wrapper: PropTypes.string,
-  params: PropTypes.object
+Brick.defaultProps = {
+  toolbars: DEFINITION.default.toolbars,
+  wrapper: DEFINITION.default.wrapper
 };
-export default withStyles(styles)(FlipToolBars);
+Brick.propTypes = {
+  classes: PropTypes.object.isRequired,
+  toolbars: PropTypes.array.isRequired,
+  wrapper: PropTypes.element.isRequired,
+  handlers: PropTypes.array,
+  initState: PropTypes.object //init state, default is {}
+};
+export default withStyles(styles)(Brick);
