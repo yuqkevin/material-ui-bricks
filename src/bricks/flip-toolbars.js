@@ -26,7 +26,6 @@ import Tooltip from "@material-ui/core/Tooltip";
 import DeleteIcon from "@material-ui/icons/Delete";
 import BorderColorIcon from "@material-ui/icons/BorderColor";
 import FilterListIcon from "@material-ui/icons/FilterList";
-import { lighten } from "@material-ui/core/styles/colorManipulator";
 
 // Sample data
 const sampleToolbars = [
@@ -262,7 +261,7 @@ Brick.defaultProps = {
 Brick.propTypes = {
   classes: PropTypes.object.isRequired,
   toolbars: PropTypes.array.isRequired,
-  wrapper: PropTypes.element.isRequired,
+  wrapper: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
   handlers: PropTypes.array,
   initState: PropTypes.object //init state, default is {}
 };
