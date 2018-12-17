@@ -36,7 +36,7 @@ const sampleToolbars = [
         type: "dynamic-text",
         content: params => `${params.message || ""}`,
         wrapper: "span",
-        css: {
+        props: {
           style: { paddingRight: "1em" }
         }
       },
@@ -72,7 +72,7 @@ const sampleToolbars = [
         type: "dynamic-text",
         content: params => `${params.selectedRows} rows selected`,
         wrapper: "span",
-        css: {
+        props: {
           style: { paddingRight: "1em" }
         },
         events: [
@@ -156,7 +156,7 @@ const DEFINITION = {
 function TextInToolbar(props) {
   let Wrapper = props.wrapper || Typography;
   return (
-    <Wrapper color="inherit" variant="subtitle1" {...props.css}>
+    <Wrapper color="inherit" variant="subtitle1" {...props.props}>
       {props.content}
     </Wrapper>
   );
@@ -211,7 +211,7 @@ function SelectedToolbar(props) {
                 content={content}
                 key={key}
                 wrapper={item.wrapper}
-                css={item.css || {}}
+                props={item.props || {}}
               />
             );
           default:
