@@ -34,7 +34,11 @@ const sampleToolbars = [
     elements: [
       {
         type: "dynamic-text",
-        content: params => `${params.message || ""}`
+        content: params => `${params.message || ""}`,
+        wrapper: "span",
+        css: {
+          style: { paddingRight: "1em" }
+        }
       },
       {
         type: "icon-button",
@@ -67,6 +71,10 @@ const sampleToolbars = [
       {
         type: "dynamic-text",
         content: params => `${params.selectedRows} rows selected`,
+        wrapper: "span",
+        css: {
+          style: { paddingRight: "1em" }
+        },
         events: [
           {
             trigger: "onClick",
@@ -146,10 +154,11 @@ const DEFINITION = {
 };
 
 function TextInToolbar(props) {
+  let Wrapper = props.wrapper || Typography;
   return (
-    <span color="inherit" variant="subtitle1" style={{ paddingRight: "1em" }}>
+    <Wrapper color="inherit" variant="subtitle1" {...props.css}>
       {props.content}
-    </span>
+    </Wrapper>
   );
 }
 function IconButtonInToolbar(props) {
@@ -197,7 +206,14 @@ function SelectedToolbar(props) {
             );
           case "dynamic-text":
             let content = item.content(props.params);
-            return <TextInToolbar content={content} key={key} />;
+            return (
+              <TextInToolbar
+                content={content}
+                key={key}
+                wrapper={item.wrapper}
+                css={item.css || {}}
+              />
+            );
           default:
             return <div key={key}>Unknown Item type {item.type}</div>;
         }
