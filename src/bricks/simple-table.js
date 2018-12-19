@@ -35,7 +35,6 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import Checkbox from "@material-ui/core/Checkbox";
-import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import DeleteIcon from "@material-ui/icons/Delete";
 import FilterListIcon from "@material-ui/icons/FilterList";
@@ -78,13 +77,7 @@ let sampleColumns = [
   { id: "protein", numeric: true, disablePadding: false, label: "Protein (g)" }
 ];
 
-const sampleData = {
-  title: "Simple Table",
-  columns: sampleColumns,
-  rows: sampleRows
-};
-// Definition
-const DEFINITION = {
+const sampleHeader = {
   selectedToolbar: 0,
   toolbars: [
     {
@@ -137,6 +130,15 @@ const DEFINITION = {
 
 // end of sample data
 
+// Definition
+const DEFINITION = {
+  default: {
+    title: "Simple Table",
+    columns: sampleColumns,
+    rows: sampleRows,
+    header: sampleHeader
+  }
+};
 function toggleHighlight() {
   this.setState({ highlight: !this.state.highlight });
 }
@@ -172,7 +174,7 @@ class EnhancedTableHead extends React.Component {
     this.props.onRequestSort(event, property);
   };
   render() {
-    const rows = this.props.column || sampleRows;
+    const rows = this.props.column || DEFINITION.default.columns;
     const {
       onSelectAllClick,
       order,
@@ -261,7 +263,6 @@ const toolbarStyles = theme => ({
 
 let EnhancedTableToolbar = props => {
   const { numSelected, classes, header } = props;
-  const myToolbars = props.toolbars || DEFINITION.toolbars;
   return (
     <Toolbar className={header.highlight ? classes.highlight : classes.default}>
       <div className={classes.title}>
@@ -269,7 +270,7 @@ let EnhancedTableToolbar = props => {
           {props.header.title}
         </Typography>
       </div>
-      <FlipToolBars className={classes.actions} toolbars={myToolbars} />
+      <FlipToolBars className={classes.actions} toolbarsx={header.toolbars} />
     </Toolbar>
   );
 };
@@ -304,7 +305,7 @@ class EnhancedTable extends React.Component {
       order: "asc",
       orderBy: "calories",
       selected: [],
-      data: props.data || sampeData,
+      data: props.data || DEFINITION.default.rows,
       page: 0,
       rowsPerPage: 5
     };
@@ -370,20 +371,18 @@ class EnhancedTable extends React.Component {
   isSelected = id => this.state.selected.indexOf(id) !== -1;
 
   render() {
-    const { classes, definition } = this.props;
+    const { classes } = this.props;
     const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
     const emptyRows =
       rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
-    const myHeader = Object.assign(definition.header || sampleHeader, {
+    const myHeader = Object.assign(DEFINITION.default.header, {
       highlight: this.state.highlight,
-      message: this.state.message
+      message: this.state.message,
+      title: this.props.title || DEFINITION.default.title
     });
     return (
       <Paper className={classes.root}>
-        <EnhancedTableToolbar
-          numSelected={selected.length}
-          header={header || sampleHeader}
-        />
+        <EnhancedTableToolbar numSelected={selected.length} header={myHeader} />
         <div className={classes.tableWrapper}>
           <Table className={classes.table} aria-labelledby="tableTitle">
             <EnhancedTableHead

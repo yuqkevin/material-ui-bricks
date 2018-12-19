@@ -20,13 +20,10 @@ import classNames from "classnames";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
 import DeleteIcon from "@material-ui/icons/Delete";
 import BorderColorIcon from "@material-ui/icons/BorderColor";
 import FilterListIcon from "@material-ui/icons/FilterList";
-
+import { IconButtonWithTooltip, Textbar } from "./materials";
 // Sample data
 const sampleToolbars = [
   {
@@ -153,42 +150,6 @@ const DEFINITION = {
   }
 };
 
-function TextInToolbar(props) {
-  let Wrapper = props.wrapper || Typography;
-  return (
-    <Wrapper color="inherit" variant="subtitle1" {...props.props}>
-      {props.content}
-    </Wrapper>
-  );
-}
-function IconButtonInToolbar(props) {
-  let item = props.button;
-  let opts = {};
-  //const handlers = props.handlers
-  if (item.events) {
-    item.events.map(evt => {
-      if (typeof evt.handler === "string") {
-        if (typeof evt.args === "object") {
-          opts[evt.trigger] = () =>
-            props.handlers[evt.handler].apply(this, evt.args);
-        } else {
-          opts[evt.trigger] = e => props.handlers[evt.handler](e, props);
-        }
-      } else if (typeof evt.handler === "function") {
-        opts[evt.trigger] = evt.handler.bind(props);
-      }
-      return true;
-    });
-  }
-  return (
-    <Tooltip title={item.title}>
-      <IconButton aria-label={item.title} {...opts}>
-        {item.icon}
-      </IconButton>
-    </Tooltip>
-  );
-}
-
 function SelectedToolbar(props) {
   const toolbar = props.toolbar;
   return (
@@ -198,7 +159,7 @@ function SelectedToolbar(props) {
         switch (item.type) {
           case "icon-button":
             return (
-              <IconButtonInToolbar
+              <IconButtonWithTooltip
                 button={item}
                 handlers={props.handlers}
                 key={key}
@@ -207,7 +168,7 @@ function SelectedToolbar(props) {
           case "dynamic-text":
             let content = item.content(props.params);
             return (
-              <TextInToolbar
+              <Textbar
                 content={content}
                 key={key}
                 wrapper={item.wrapper}
