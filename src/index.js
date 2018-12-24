@@ -6,7 +6,18 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 
 import "./styles.css";
-
+function loading(props) {
+  if (props.error) {
+    return (
+      <div>
+        Error! Failed to load module.
+        <button onClick={alert(props.error)} />
+      </div>
+    );
+  } else {
+    return <div>Loading ...</div>;
+  }
+}
 function pickBrick(brickName) {
   //this.setState({ brick: <div>{brickName}</div> });
   let brick = null;
@@ -16,12 +27,16 @@ function pickBrick(brickName) {
     this.setState({ brick });
   } else {
     console.log("loading ", brickName);
-    brick = Loadable({
-      loader: () => import(`./bricks/${brickName}`),
-      loading: () => <div>Loadding {brickName} ...</div>
-    });
-    bricks[brickName] = brick;
-    this.setState({ bricks, brick });
+    try {
+      brick = Loadable({
+        loader: () => import(`./demos/demo-${brickName}`),
+        loading: loading
+      });
+      bricks[brickName] = brick;
+      this.setState({ bricks, brick });
+    } catch (e) {
+      console.log("Failed to load Brick:", e);
+    }
   }
 }
 function Toc() {

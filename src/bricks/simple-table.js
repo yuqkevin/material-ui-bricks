@@ -263,6 +263,12 @@ const toolbarStyles = theme => ({
 
 let EnhancedTableToolbar = props => {
   const { numSelected, classes, header } = props;
+  let initState = {
+    eventSource: "parent",
+    selectedRows: numSelected,
+    selectedToolbar: numSelected > 0 ? 1 : 0
+  };
+  console.log("initState", initState);
   return (
     <Toolbar className={header.highlight ? classes.highlight : classes.default}>
       <div className={classes.title}>
@@ -270,7 +276,11 @@ let EnhancedTableToolbar = props => {
           {props.header.title}
         </Typography>
       </div>
-      <FlipToolBars className={classes.actions} toolbarsx={header.toolbars} />
+      <FlipToolBars
+        className={classes.actions}
+        toolbarsx={header.toolbars}
+        initState={initState}
+      />
     </Toolbar>
   );
 };
