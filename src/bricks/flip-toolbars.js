@@ -78,9 +78,9 @@ class Brick extends React.Component {
     super(props);
     this.handlers = {};
     this.props.handlers.map(f => (this.handlers[f.name] = f.bind(this)));
-    this.state = props.initStates;
+    this.state = props.initState;
   }
-
+  /**
   componentDidUpdate(prevProps) {
     let changed = false;
     for (let key in this.props.initState) {
@@ -96,7 +96,7 @@ class Brick extends React.Component {
       this.setState(this.props.initState);
     }
   }
-
+**/
   render() {
     const { wrapper, toolbars, withClasses } = this.props;
     const classes = Object.assign(this.props.classes, withClasses);

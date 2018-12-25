@@ -42,6 +42,103 @@ import { lighten } from "@material-ui/core/styles/colorManipulator";
 
 import FlipToolBars from "./flip-toolbars";
 
+// Sample data
+let counter = 0;
+function createData(name, calories, fat, carbs, protein) {
+  counter += 1;
+  return { id: counter, name, calories, fat, carbs, protein };
+}
+let sampleRows = [
+  createData("Cupcake", 305, 3.7, 67, 4.3),
+  createData("Donut", 452, 25.0, 51, 4.9),
+  createData("Eclair", 262, 16.0, 24, 6.0),
+  createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
+  createData("Gingerbread", 356, 16.0, 49, 3.9),
+  createData("Honeycomb", 408, 3.2, 87, 6.5),
+  createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
+  createData("Jelly Bean", 375, 0.0, 94, 0.0),
+  createData("KitKat", 518, 26.0, 65, 7.0),
+  createData("Lollipop", 392, 0.2, 98, 0.0),
+  createData("Marshmallow", 318, 0, 81, 2.0),
+  createData("Nougat", 360, 19.0, 9, 37.0),
+  createData("Oreo", 437, 18.0, 63, 4.0)
+];
+
+let sampleColumns = [
+  {
+    id: "name",
+    numeric: false,
+    disablePadding: true,
+    label: "Dessert (100g serving)"
+  },
+  { id: "calories", numeric: true, disablePadding: false, label: "Calories" },
+  { id: "fat", numeric: true, disablePadding: false, label: "Fat (g)" },
+  { id: "carbs", numeric: true, disablePadding: false, label: "Carbs (g)" },
+  { id: "protein", numeric: true, disablePadding: false, label: "Protein (g)" }
+];
+
+const sampleHeader = {
+  selectedToolbar: 0,
+  toolbars: [
+    {
+      name: "default",
+      elements: [
+        {
+          type: "icon-button",
+          title: "Filters",
+          icon: <FilterListIcon />,
+          handlers: [
+            {
+              name: "onClick",
+              handler: "flipTo",
+              args: [1]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      name: "deletion",
+      elements: [
+        {
+          type: "dynamic-text",
+          content: params => `${params.selectedRows} rows selected`,
+          handlers: [
+            {
+              name: "onClick",
+              handler: "flipTo",
+              args: [0]
+            }
+          ]
+        },
+        {
+          type: "icon-button",
+          title: "Delete",
+          icon: <DeleteIcon />,
+          handlers: [
+            {
+              name: "onClick",
+              handler: "flipTo",
+              args: [0]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+// end of sample data
+
+// Definition
+const DEFINITION = {
+  default: {
+    title: "Simple Table",
+    columns: sampleColumns,
+    rows: sampleRows,
+    header: sampleHeader
+  }
+};
 function toggleHighlight() {
   this.setState({ highlight: !this.state.highlight });
 }
@@ -77,7 +174,7 @@ class EnhancedTableHead extends React.Component {
     this.props.onRequestSort(event, property);
   };
   render() {
-    const rows = this.props.columns;
+    const rows = this.props.column || DEFINITION.default.columns;
     const {
       onSelectAllClick,
       order,
@@ -135,10 +232,70 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired
 };
 
+const toolbarStyles = theme => ({
+  root: {
+    paddingRight: theme.spacing.unit
+  },
+  highlight:
+    theme.palette.type === "light"
+      ? {
+          color: theme.palette.secondary.main,
+          backgroundColor: lighten(theme.palette.secondary.light, 0.85)
+        }
+      : {
+          color: theme.palette.text.primary,
+          backgroundColor: theme.palette.secondary.dark
+        },
+  actions: {
+    textAlign: "right",
+    flex: "1 1 100%",
+    color: theme.palette.text.secondary
+  },
+  title: {
+    flex: "0 0 auto"
+  },
+  message: {
+    float: "left",
+    paddingLeft: "2em",
+    paddingTop: "1em"
+  }
+});
+
+let EnhancedTableToolbar = props => {
+  const { numSelected, classes, header } = props;
+  let initState = {
+    eventSource: "parent",
+    selectedRows: numSelected,
+    selectedToolbar: numSelected > 0 ? 1 : 0
+  };
+  console.log("initState", initState);
+  return (
+    <Toolbar className={header.highlight ? classes.highlight : classes.default}>
+      <div className={classes.title}>
+        <Typography variant="h6" id="tableTitle">
+          {props.header.title}
+        </Typography>
+      </div>
+      <FlipToolBars
+        className={classes.actions}
+        toolbarsx={header.toolbars}
+        initState={initState}
+      />
+    </Toolbar>
+  );
+};
+
+EnhancedTableToolbar.propTypes = {
+  classes: PropTypes.object.isRequired,
+  numSelected: PropTypes.number.isRequired,
+  toolbar: PropTypes.object
+};
+
+EnhancedTableToolbar = withStyles(toolbarStyles)(EnhancedTableToolbar);
+
 const styles = theme => ({
   root: {
     width: "100%",
-    textAlign: "right",
     marginTop: theme.spacing.unit * 3
   },
   table: {
@@ -149,11 +306,19 @@ const styles = theme => ({
   }
 });
 
-class Brick extends React.Component {
+class EnhancedTable extends React.Component {
   constructor(props) {
     super(props);
-    //toggleHighlight = toggleHighlight.bind(this);
-    this.state = props.initState;
+    toggleHighlight = toggleHighlight.bind(this);
+    this.state = {
+      hightlight: false,
+      order: "asc",
+      orderBy: "calories",
+      selected: [],
+      data: props.data || DEFINITION.default.rows,
+      page: 0,
+      rowsPerPage: 5
+    };
   }
 
   handleRequestSort = (event, property) => {
@@ -210,42 +375,37 @@ class Brick extends React.Component {
   };
 
   handleChangeRowsPerPage = event => {
-    this.setState({ pageSize: event.target.value });
+    this.setState({ rowsPerPage: event.target.value });
   };
 
   isSelected = id => this.state.selected.indexOf(id) !== -1;
 
   render() {
-    const { classes, title } = this.props;
-    const { columns, rows } = this.props.table;
-    const BrickToolbar = this.props.toolbars;
-    const { data, order, orderBy, selected, pageSize, page } = this.state;
+    const { classes } = this.props;
+    const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
     const emptyRows =
-      pageSize - Math.min(pageSize, data.length - page * pageSize);
+      rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
+    const myHeader = Object.assign(DEFINITION.default.header, {
+      highlight: this.state.highlight,
+      message: this.state.message,
+      title: this.props.title || DEFINITION.default.title
+    });
     return (
       <Paper className={classes.root}>
-        <Toolbar className={classes.default}>
-          <div className={classes.title}>
-            <Typography variant="h6" id="tableTitle">
-              {title}
-            </Typography>
-          </div>
-          {BrickToolbar && <BrickToolbar />}
-        </Toolbar>
+        <EnhancedTableToolbar numSelected={selected.length} header={myHeader} />
         <div className={classes.tableWrapper}>
           <Table className={classes.table} aria-labelledby="tableTitle">
             <EnhancedTableHead
-              columns={columns}
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
               onSelectAllClick={this.handleSelectAllClick}
               onRequestSort={this.handleRequestSort}
-              rowCount={rows.length}
+              rowCount={data.length}
             />
             <TableBody>
               {stableSort(data, getSorting(order, orderBy))
-                .slice(page * pageSize, page * pageSize + pageSize)
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map(n => {
                   const isSelected = this.isSelected(n.id);
                   return (
@@ -279,36 +439,31 @@ class Brick extends React.Component {
             </TableBody>
           </Table>
         </div>
-        {pageSize > 0 && (
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={pageSize}
-            page={page}
-            backIconButtonProps={{
-              "aria-label": "Previous Page"
-            }}
-            nextIconButtonProps={{
-              "aria-label": "Next Page"
-            }}
-            onChangePage={this.handleChangePage}
-            onChangeRowsPerPage={this.handleChangeRowsPerPage}
-          />
-        )}
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          backIconButtonProps={{
+            "aria-label": "Previous Page"
+          }}
+          nextIconButtonProps={{
+            "aria-label": "Next Page"
+          }}
+          onChangePage={this.handleChangePage}
+          onChangeRowsPerPage={this.handleChangeRowsPerPage}
+        />
       </Paper>
     );
   }
 }
 
-Brick.propTypes = {
+EnhancedTable.propTypes = {
   classes: PropTypes.object.isRequired,
-  title: PropTypes.string.isRequired,
-  table: PropTypes.object.isRequired,
-  toolbar: PropTypes.func,
-  handlers: PropTypes.array, // handlers for table
-  withClasses: PropTypes.object, //for customization
-  initState: PropTypes.object //init state
+  definition: PropTypes.object,
+  header: PropTypes.object,
+  table: PropTypes.object
 };
 
-export default withStyles(styles)(Brick);
+export default withStyles(styles)(EnhancedTable);

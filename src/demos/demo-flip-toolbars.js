@@ -147,7 +147,7 @@ const SampleProps = {
   toolbars: sampleToolbars,
   wrapper: Toolbar, // to use HTML DOM as wrapper, it can be string like "div",
   handlers: sampleHandlers,
-  initStates: sampleStates
+  initState: sampleStates
 };
 
 const styles = theme => ({
@@ -164,8 +164,6 @@ const styles = theme => ({
 });
 
 function BrickDemo(props) {
-  return (
-    <FlipToolbar withClasses={props.classes} styles={styles} {...SampleProps} />
-  );
+  return <FlipToolbar withClasses={props.classes} {...SampleProps} />;
 }
 export default withStyles(styles)(BrickDemo);
