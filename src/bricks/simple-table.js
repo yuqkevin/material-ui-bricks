@@ -41,6 +41,7 @@ import FilterListIcon from "@material-ui/icons/FilterList";
 import { lighten } from "@material-ui/core/styles/colorManipulator";
 
 import FlipToolBars from "./flip-toolbars";
+import BrickBase from "./brick";
 
 function toggleHighlight() {
   this.setState({ highlight: !this.state.highlight });
@@ -83,18 +84,21 @@ class EnhancedTableHead extends React.Component {
       order,
       orderBy,
       numSelected,
-      rowCount
+      rowCount,
+      hasCheckBox
     } = this.props;
 
     return (
       <TableHead>
         <TableRow>
           <TableCell padding="checkbox">
-            <Checkbox
-              indeterminate={numSelected > 0 && numSelected < rowCount}
-              checked={numSelected === rowCount}
-              onChange={onSelectAllClick}
-            />
+            {hasCheckBox && (
+              <Checkbox
+                indeterminate={numSelected > 0 && numSelected < rowCount}
+                checked={numSelected === rowCount}
+                onChange={onSelectAllClick}
+              />
+            )}
           </TableCell>
           {rows.map(row => {
             return (
@@ -149,13 +153,7 @@ const styles = theme => ({
   }
 });
 
-class Brick extends React.Component {
-  constructor(props) {
-    super(props);
-    //toggleHighlight = toggleHighlight.bind(this);
-    this.state = props.initState;
-  }
-
+class Brick extends BrickBase {
   handleRequestSort = (event, property) => {
     const orderBy = property;
     let order = "desc";
@@ -215,11 +213,37 @@ class Brick extends React.Component {
 
   isSelected = id => this.state.selected.indexOf(id) !== -1;
 
+  componentWillMount() {
+    this.RightTopToolbar = () => {
+      if (this.bricks["RightTopToolbar"]) {
+        let RightTopToolbar = this.bricks["RightTopToolbar"].component;
+        let data = this.bricks["RightTopToolbar"].data;
+        if (data.handlers && data.handlers.parent) {
+          let parentHandlers = [];
+          data.handlers.parent.map(fname =>
+            parentHandlers.push(this.handlers[fname])
+          );
+          data.handlers.parent = parentHandlers;
+        }
+        return <RightTopToolbar {...data} />;
+      } else {
+        return <div />;
+      }
+    };
+  }
   render() {
     const { classes, title } = this.props;
     const { columns, rows } = this.props.table;
-    const BrickToolbar = this.props.toolbars;
-    const { data, order, orderBy, selected, pageSize, page } = this.state;
+    const {
+      data,
+      order,
+      orderBy,
+      selected,
+      pageSize,
+      page,
+      hasCheckBox
+    } = this.state;
+    const RightTopToolbar = this.RightTopToolbar || NaN;
     const emptyRows =
       pageSize - Math.min(pageSize, data.length - page * pageSize);
     return (
@@ -230,12 +254,13 @@ class Brick extends React.Component {
               {title}
             </Typography>
           </div>
-          {BrickToolbar && <BrickToolbar />}
+          {RightTopToolbar()}
         </Toolbar>
         <div className={classes.tableWrapper}>
           <Table className={classes.table} aria-labelledby="tableTitle">
             <EnhancedTableHead
               columns={columns}
+              hasCheckBox={hasCheckBox}
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
@@ -259,7 +284,7 @@ class Brick extends React.Component {
                       selected={isSelected}
                     >
                       <TableCell padding="checkbox">
-                        <Checkbox checked={isSelected} />
+                        {hasCheckBox && <Checkbox checked={isSelected} />}
                       </TableCell>
                       <TableCell component="th" scope="row" padding="none">
                         {n.name}
@@ -301,12 +326,15 @@ class Brick extends React.Component {
   }
 }
 
+Brick.defaultProps = {
+  handlers: { local: [], parent: [] }
+};
 Brick.propTypes = {
   classes: PropTypes.object.isRequired,
   title: PropTypes.string.isRequired,
   table: PropTypes.object.isRequired,
-  toolbar: PropTypes.func,
-  handlers: PropTypes.array, // handlers for table
+  bricks: PropTypes.array,
+  handlers: PropTypes.object, // {local: [], parent: []}
   withClasses: PropTypes.object, //for customization
   initState: PropTypes.object //init state
 };

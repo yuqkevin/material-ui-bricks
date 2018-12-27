@@ -146,7 +146,7 @@ const sampleStates = {
 const SampleProps = {
   toolbars: sampleToolbars,
   wrapper: Toolbar, // to use HTML DOM as wrapper, it can be string like "div",
-  handlers: sampleHandlers,
+  handlers: { local: sampleHandlers },
   initState: sampleStates
 };
 

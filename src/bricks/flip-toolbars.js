@@ -22,6 +22,7 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Toolbar from "@material-ui/core/Toolbar";
 import { IconButtonWithTooltip, Textbar } from "./materials";
+import BrickBase from "./brick";
 
 function SelectedToolbar(props) {
   const toolbar = props.toolbar;
@@ -73,13 +74,7 @@ const styles = theme => ({
         }
 });
 
-class Brick extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handlers = {};
-    this.props.handlers.map(f => (this.handlers[f.name] = f.bind(this)));
-    this.state = props.initState;
-  }
+class Brick extends BrickBase {
   /**
   componentDidUpdate(prevProps) {
     let changed = false;
@@ -121,7 +116,7 @@ Brick.propTypes = {
   classes: PropTypes.object.isRequired,
   toolbars: PropTypes.array.isRequired,
   wrapper: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
-  handlers: PropTypes.array,
+  handlers: PropTypes.object, // {local: [], parent: []}
   withClasses: PropTypes.object, //for customization
   initState: PropTypes.object //init state
 };
