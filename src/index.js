@@ -51,6 +51,9 @@ function Toc() {
       <Button size="small" onClick={() => pickBrick("simple-table")}>
         Simple Table
       </Button>
+      <Button size="small" onClick={() => pickBrick("table-with-toolbar")}>
+        Table With Toolbar
+      </Button>
     </div>
   );
 }

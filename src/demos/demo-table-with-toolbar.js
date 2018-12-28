@@ -1,5 +1,5 @@
 /**
- * SimpleTable Demo
+ * Table With Toolbar Demo
  *  title
  *  toolbars (optional)
  *  prompt (default null)
@@ -19,7 +19,7 @@ import DownloadIcon from "@material-ui/icons/SaveAlt";
 import CancelIcon from "@material-ui/icons/Close";
 import { lighten } from "@material-ui/core/styles/colorManipulator";
 
-import SimpleTable from "../bricks/simple-table";
+import TableWithToolbar from "../bricks/table-with-toolbar";
 
 // Sample data for table
 let counter = 0;
@@ -63,15 +63,22 @@ const sampleTopLevelHandlers = [
     this.setState({ hasCheckBox: !this.state.hasCheckBox });
   }
 ];
-const sampleTableHandlers = [function onSelected() {}];
+const sampleTableHandlers = [
+  function onSelect(evt, props) {
+    props.handlers.toggleHighlight();
+  }
+];
 const sampleInitState = {
+  hasCheckBox: false,
+  highlight: false
+};
+const sampleTableInitState = {
   order: "asc",
   orderBy: "calories",
   selected: [],
   data: sampleRows,
   page: 0,
-  pageSize: 5,
-  hasCheckBox: false
+  pageSize: 5
 };
 // sample data for toolbar
 const sampleToolbarInitState = {
@@ -112,6 +119,7 @@ const sampleToolbarHandlers = [
   },
   function download(evt, props) {
     this.setState({ message: "Downloading ..." });
+    console.log(props);
   },
   function deletion(evt, props) {
     this.setState({ message: "Please select rows you want to delete." });
@@ -212,15 +220,24 @@ const toolbarStyles = theme => ({
 
 const SAMPLE_DATA = {
   initState: sampleInitState,
-  table: {
-    styles: tableStyles,
-    columns: sampleColumns,
-    rows: sampleRows,
-    handlers: {
-      local: sampleTableHandlers
-    }
+  handlers: {
+    local: sampleTopLevelHandlers
   },
   bricks: [
+    {
+      name: "MainTable",
+      module: "sorted-table",
+      data: {
+        styles: tableStyles,
+        columns: sampleColumns,
+        rows: sampleRows,
+        hasCheckBox: () => this.state.hasCheckBox,
+        initState: sampleTableInitState,
+        handlers: {
+          local: sampleTableHandlers
+        }
+      }
+    },
     {
       name: "RightTopToolbar", // name in parent
       module: "flip-toolbars",
@@ -239,16 +256,15 @@ const SAMPLE_DATA = {
   ]
 };
 
-function SimpleTableDemo(props) {
+function BrickDemo(props) {
   return (
-    <SimpleTable
+    <TableWithToolbar
       withClasses={props.classes}
-      title={"Simple Table Demo"}
-      table={SAMPLE_DATA.table}
-      bricks={SAMPLE_DATA.bricks.slice()}
-      handlers={{ local: sampleTopLevelHandlers }}
+      title={"Table With Toolbar Demo"}
+      bricks={SAMPLE_DATA.bricks}
+      handlers={SAMPLE_DATA.handlers}
       initState={SAMPLE_DATA.initState}
     />
   );
 }
-export default withStyles(tableStyles)(SimpleTableDemo);
+export default withStyles(tableStyles)(BrickDemo);

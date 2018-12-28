@@ -134,10 +134,11 @@ const sampleHandlers = [
     this.handlers.flipTo(0);
   }
 ];
-const sampleStates = {
+const sampleInitStates = {
   eventSource: "local",
   selectedRows: 0,
   selectedToolbar: 0,
+  highlight: false,
   message: ""
 };
 // end of sample data
@@ -147,7 +148,7 @@ const SampleProps = {
   toolbars: sampleToolbars,
   wrapper: Toolbar, // to use HTML DOM as wrapper, it can be string like "div",
   handlers: { local: sampleHandlers },
-  initState: sampleStates
+  initState: sampleInitStates
 };
 
 const styles = theme => ({
@@ -164,6 +165,6 @@ const styles = theme => ({
 });
 
 function BrickDemo(props) {
-  return <FlipToolbar withClasses={props.classes} {...SampleProps} />;
+  return <FlipToolbar {...SampleProps} />;
 }
 export default withStyles(styles)(BrickDemo);

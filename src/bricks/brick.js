@@ -1,4 +1,5 @@
 import React from "react";
+import { withStyles } from "@material-ui/core/styles";
 import Loadable from "react-loadable";
 
 function loadBrick(brick) {
@@ -16,6 +17,7 @@ function loadBrick(brick) {
 class BrickBase extends React.Component {
   constructor(props) {
     super(props);
+    //let brickName = this.__proto__.constructor.name;
     this.handlers = {};
     let parentHandlers = this.props.handlers.parent || [];
     parentHandlers.map(f => {
@@ -23,6 +25,7 @@ class BrickBase extends React.Component {
         // remove function name prefix "bound " since function is bound with parent
         this.handlers[f.name.replace("bound ", "")] = f;
       }
+      return true;
     });
     let localHandlers = this.props.handlers.local || [];
     localHandlers.map(f => (this.handlers[f.name] = f.bind(this)));
@@ -30,21 +33,22 @@ class BrickBase extends React.Component {
     // pre-load sub-bricks
     let bricks = props.bricks || [];
     this.bricks = {};
-    bricks.map(
-      brick =>
-        (this.bricks[brick.name] = {
-          component: loadBrick(brick),
-          data: brick.data
-        })
-    );
-  }
-
-  handlerInject(TargetComponent, handlers) {
-    return class extends React.Component {
-      render() {
-        return <TargetComponent parentHandlers={handlers || []} />;
+    bricks.map(brick => {
+      if (brick.data.handlers && brick.data.handlers.parentNames) {
+        let parentHandlers = [];
+        brick.data.handlers.parentNames.map(fname =>
+          parentHandlers.push(this.handlers[fname])
+        );
+        // adding handler functions
+        brick.data.handlers.parent = parentHandlers;
       }
-    };
+      let BrickComp = loadBrick(brick);
+      if (brick.data.styles) {
+        BrickComp = withStyles(brick.data.styles)(BrickComp);
+      }
+      this.bricks[brick.name] = () => <BrickComp {...brick.data} />;
+      return true;
+    });
   }
 }
 

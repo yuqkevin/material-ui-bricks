@@ -74,32 +74,14 @@ const styles = theme => ({
         }
 });
 
-class Brick extends BrickBase {
-  /**
-  componentDidUpdate(prevProps) {
-    let changed = false;
-    for (let key in this.props.initState) {
-      if (this.props.initState[key] !== this.state[key]) {
-        // Any changes in props.initState will override current state with initState in props
-        // CAUTION!!! You're using "Derived State", please design state carefully, otherwise may cause issues:
-        //   1. Breaking rule of single source of truth (both props and local event may cause state changes)
-        //   2. Will lose local state updates (overlapped parts)
-        changed = true;
-      }
-    }
-    if (changed) {
-      this.setState(this.props.initState);
-    }
-  }
-**/
+class FlipToolbars extends BrickBase {
   render() {
-    const { wrapper, toolbars, withClasses } = this.props;
-    const classes = Object.assign(this.props.classes, withClasses);
+    const { wrapper, toolbars, classes } = this.props;
     const Wrapper = wrapper || Toolbar;
     return (
       <Wrapper
         className={classNames(classes.root, {
-          [classes.highlight]: this.state.selectedToolbar > 0
+          [classes.highlight]: this.state.highlight
         })}
       >
         <SelectedToolbar
@@ -112,12 +94,11 @@ class Brick extends BrickBase {
     );
   }
 }
-Brick.propTypes = {
+FlipToolbars.propTypes = {
   classes: PropTypes.object.isRequired,
   toolbars: PropTypes.array.isRequired,
   wrapper: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
   handlers: PropTypes.object, // {local: [], parent: []}
-  withClasses: PropTypes.object, //for customization
   initState: PropTypes.object //init state
 };
-export default withStyles(styles)(Brick);
+export default withStyles(styles)(FlipToolbars);

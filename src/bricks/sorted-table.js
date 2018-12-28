@@ -1,23 +1,5 @@
 /**
- * SimpleTable
- *  HeaderToolbar (optional)
- *  Table
- *    EnhancedTableHeader (optional)
- *    TableBody
- *    PaginatedTableFooter (optional)
- *
- * Input:
- *  header:
- *    title:  table title
- *    toolbar:  header right toolbar
- *    highligth: false, contole
- *    message:  ''
- *  table:
- *    header: column definitions
- *    data: data rows
- *    footer:
- *      message:
- *      pagesize: default page size
+ * Sorted Table
  **/
 
 import React from "react";
@@ -31,16 +13,9 @@ import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import Paper from "@material-ui/core/Paper";
 import Checkbox from "@material-ui/core/Checkbox";
 import Tooltip from "@material-ui/core/Tooltip";
-import DeleteIcon from "@material-ui/icons/Delete";
-import FilterListIcon from "@material-ui/icons/FilterList";
-import { lighten } from "@material-ui/core/styles/colorManipulator";
 
-import FlipToolBars from "./flip-toolbars";
 import BrickBase from "./brick";
 
 function desc(a, b, orderBy) {
@@ -149,7 +124,7 @@ const styles = theme => ({
   }
 });
 
-class SimpleTable extends BrickBase {
+class Brick extends BrickBase {
   handleRequestSort = (event, property) => {
     const orderBy = property;
     let order = "desc";
@@ -210,110 +185,91 @@ class SimpleTable extends BrickBase {
   isSelected = id => this.state.selected.indexOf(id) !== -1;
 
   render() {
-    const { classes, title } = this.props;
-    const { columns, rows } = this.props.table;
-    const {
-      data,
-      order,
-      orderBy,
-      selected,
-      pageSize,
-      page,
-      hasCheckBox
-    } = this.state;
+    const { classes, columns, rows, hasCheckBox } = this.props;
+    const { data, order, orderBy, selected, pageSize, page } = this.state;
     const emptyRows =
       pageSize - Math.min(pageSize, data.length - page * pageSize);
     return (
-      <Paper className={classes.root}>
-        <Toolbar className={classes.default}>
-          <div className={classes.title}>
-            <Typography variant="h6" id="tableTitle">
-              {title}
-            </Typography>
-          </div>
-          {this.bricks.RightTopToolbar()}
-        </Toolbar>
-        <div className={classes.tableWrapper}>
-          <Table className={classes.table} aria-labelledby="tableTitle">
-            <EnhancedTableHead
-              columns={columns}
-              hasCheckBox={hasCheckBox}
-              numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
-              onSelectAllClick={this.handleSelectAllClick}
-              onRequestSort={this.handleRequestSort}
-              rowCount={rows.length}
-            />
-            <TableBody>
-              {stableSort(data, getSorting(order, orderBy))
-                .slice(page * pageSize, page * pageSize + pageSize)
-                .map(n => {
-                  const isSelected = this.isSelected(n.id);
-                  return (
-                    <TableRow
-                      hover
-                      onClick={event => this.handleClick(event, n.id)}
-                      role="checkbox"
-                      aria-checked={isSelected}
-                      tabIndex={-1}
-                      key={n.id}
-                      selected={isSelected}
-                    >
-                      <TableCell padding="checkbox">
-                        {hasCheckBox && <Checkbox checked={isSelected} />}
-                      </TableCell>
-                      <TableCell component="th" scope="row" padding="none">
-                        {n.name}
-                      </TableCell>
-                      <TableCell numeric>{n.calories}</TableCell>
-                      <TableCell numeric>{n.fat}</TableCell>
-                      <TableCell numeric>{n.carbs}</TableCell>
-                      <TableCell numeric>{n.protein}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 49 * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-          {pageSize > 0 && (
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={rows.length}
-              rowsPerPage={pageSize}
-              page={page}
-              backIconButtonProps={{
-                "aria-label": "Previous Page"
-              }}
-              nextIconButtonProps={{
-                "aria-label": "Next Page"
-              }}
-              onChangePage={this.handleChangePage}
-              onChangeRowsPerPage={this.handleChangeRowsPerPage}
-            />
-          )}
-        </div>
-      </Paper>
+      <div className={classes.tableWrapper}>
+        <Table className={classes.table} aria-labelledby="tableTitle">
+          <EnhancedTableHead
+            columns={columns}
+            hasCheckBox={hasCheckBox}
+            numSelected={selected.length}
+            order={order}
+            orderBy={orderBy}
+            onSelectAllClick={this.handleSelectAllClick}
+            onRequestSort={this.handleRequestSort}
+            rowCount={rows.length}
+          />
+          <TableBody>
+            {stableSort(data, getSorting(order, orderBy))
+              .slice(page * pageSize, page * pageSize + pageSize)
+              .map(n => {
+                const isSelected = this.isSelected(n.id);
+                return (
+                  <TableRow
+                    hover
+                    onClick={event => this.handleClick(event, n.id)}
+                    role="checkbox"
+                    aria-checked={isSelected}
+                    tabIndex={-1}
+                    key={n.id}
+                    selected={isSelected}
+                  >
+                    <TableCell padding="checkbox">
+                      {hasCheckBox && <Checkbox checked={isSelected} />}
+                    </TableCell>
+                    <TableCell component="th" scope="row" padding="none">
+                      {n.name}
+                    </TableCell>
+                    <TableCell numeric>{n.calories}</TableCell>
+                    <TableCell numeric>{n.fat}</TableCell>
+                    <TableCell numeric>{n.carbs}</TableCell>
+                    <TableCell numeric>{n.protein}</TableCell>
+                  </TableRow>
+                );
+              })}
+            {emptyRows > 0 && (
+              <TableRow style={{ height: 49 * emptyRows }}>
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+        {pageSize > 0 && (
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={rows.length}
+            rowsPerPage={pageSize}
+            page={page}
+            backIconButtonProps={{
+              "aria-label": "Previous Page"
+            }}
+            nextIconButtonProps={{
+              "aria-label": "Next Page"
+            }}
+            onChangePage={this.handleChangePage}
+            onChangeRowsPerPage={this.handleChangeRowsPerPage}
+          />
+        )}
+      </div>
     );
   }
 }
 
-SimpleTable.defaultProps = {
-  handlers: { local: [], parent: [] }
+Brick.defaultProps = {
+  handlers: { local: [], parent: [] },
+  hasCheckBox: false
 };
-SimpleTable.propTypes = {
+Brick.propTypes = {
   classes: PropTypes.object.isRequired,
-  title: PropTypes.string.isRequired,
   table: PropTypes.object.isRequired,
+  hasCheckBox: PropTypes.bool.isRequired,
   bricks: PropTypes.array,
   handlers: PropTypes.object, // {local: [], parent: []}
-  withClasses: PropTypes.object, //for customization
   initState: PropTypes.object //init state
 };
 
-export default withStyles(styles)(SimpleTable);
+export default withStyles(styles)(Brick);
