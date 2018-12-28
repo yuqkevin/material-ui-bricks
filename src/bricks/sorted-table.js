@@ -124,7 +124,7 @@ const styles = theme => ({
   }
 });
 
-class Brick extends BrickBase {
+class SortedTable extends BrickBase {
   handleRequestSort = (event, property) => {
     const orderBy = property;
     let order = "desc";
@@ -185,7 +185,8 @@ class Brick extends BrickBase {
   isSelected = id => this.state.selected.indexOf(id) !== -1;
 
   render() {
-    const { classes, columns, rows, hasCheckBox } = this.props;
+    const { classes, table, hasCheckBox } = this.props;
+    const { columns, rows } = table;
     const { data, order, orderBy, selected, pageSize, page } = this.state;
     const emptyRows =
       pageSize - Math.min(pageSize, data.length - page * pageSize);
@@ -259,11 +260,11 @@ class Brick extends BrickBase {
   }
 }
 
-Brick.defaultProps = {
+SortedTable.defaultProps = {
   handlers: { local: [], parent: [] },
   hasCheckBox: false
 };
-Brick.propTypes = {
+SortedTable.propTypes = {
   classes: PropTypes.object.isRequired,
   table: PropTypes.object.isRequired,
   hasCheckBox: PropTypes.bool.isRequired,
@@ -272,4 +273,4 @@ Brick.propTypes = {
   initState: PropTypes.object //init state
 };
 
-export default withStyles(styles)(Brick);
+export default withStyles(styles)(SortedTable);

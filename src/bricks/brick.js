@@ -46,7 +46,17 @@ class BrickBase extends React.Component {
       if (brick.data.styles) {
         BrickComp = withStyles(brick.data.styles)(BrickComp);
       }
-      this.bricks[brick.name] = () => <BrickComp {...brick.data} />;
+      // mapping state to props (definied in fromState in brick data)
+      let getState = (fromState = {}) => {
+        let state = {};
+        for (let key in fromState) {
+          state[key] = this.state[fromState[key]];
+        }
+        return state;
+      };
+      this.bricks[brick.name] = () => (
+        <BrickComp {...brick.data} {...getState(brick.data.fromState)} />
+      );
       return true;
     });
   }

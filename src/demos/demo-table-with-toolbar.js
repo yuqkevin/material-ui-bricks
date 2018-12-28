@@ -59,8 +59,14 @@ const sampleTopLevelHandlers = [
   function toggleHighlight() {
     this.setState({ highlight: !this.state.highlight });
   },
+  function getHighlight() {
+    return this.state.hightlight;
+  },
   function toggleCheckBox() {
     this.setState({ hasCheckBox: !this.state.hasCheckBox });
+  },
+  function getHasCheckBox() {
+    return this.state.hasCheckBox;
   }
 ];
 const sampleTableHandlers = [
@@ -122,7 +128,11 @@ const sampleToolbarHandlers = [
     console.log(props);
   },
   function deletion(evt, props) {
-    this.setState({ message: "Please select rows you want to delete." });
+    let message = "Please select rows you want to delete.";
+    if (props.handlers.getHasCheckBox()) {
+      message = "";
+    }
+    this.setState({ message });
     props.handlers.toggleCheckBox();
   },
   function deleteGo(evt, props) {
@@ -229,12 +239,17 @@ const SAMPLE_DATA = {
       module: "sorted-table",
       data: {
         styles: tableStyles,
-        columns: sampleColumns,
-        rows: sampleRows,
-        hasCheckBox: () => this.state.hasCheckBox,
+        table: {
+          columns: sampleColumns,
+          rows: sampleRows
+        },
         initState: sampleTableInitState,
+        fromState: {
+          hasCheckBox: "hasCheckBox" // props_name: state_name
+        },
         handlers: {
-          local: sampleTableHandlers
+          local: sampleTableHandlers,
+          parentNames: ["toggleHighlight", "getHighlight"]
         }
       }
     },
@@ -248,7 +263,7 @@ const SAMPLE_DATA = {
         styles: toolbarStyles,
         handlers: {
           local: sampleToolbarHandlers,
-          parentNames: ["toggleCheckBox"] // names only, will be loaded with bound function
+          parentNames: ["toggleCheckBox", "getHasCheckBox"] // names only, will be loaded with bound function
         },
         initState: sampleToolbarInitState
       }
