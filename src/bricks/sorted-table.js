@@ -206,15 +206,21 @@ class SortedTable extends BrickBase {
               .slice(page * pageSize, page * pageSize + pageSize)
               .map(n => {
                 const isSelected = this.isSelected(n.id);
+                let rowSelect = {};
+                if (hasCheckBox) {
+                  rowSelect = {
+                    onClick: event => this.handleClick(event, n.id)
+                  };
+                }
                 return (
                   <TableRow
                     hover
-                    onClick={event => this.handleClick(event, n.id)}
                     role="checkbox"
                     aria-checked={isSelected}
                     tabIndex={-1}
                     key={n.id}
                     selected={isSelected}
+                    {...rowSelect}
                   >
                     <TableCell padding="checkbox">
                       {hasCheckBox && <Checkbox checked={isSelected} />}
