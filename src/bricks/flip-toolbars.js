@@ -40,13 +40,11 @@ function SelectedToolbar(props) {
               />
             );
           case "dynamic-text":
-            let content = item.content(props.params);
             return (
               <Textbar
-                content={content}
+                content={props.message}
                 key={key}
                 wrapper={item.wrapper}
-                props={item.props || {}}
               />
             );
           default:
@@ -60,33 +58,21 @@ function SelectedToolbar(props) {
 const styles = theme => ({
   root: {
     paddingRight: theme.spacing.unit,
-    flex: "1 1 100%",
+    flex: "1 1 auto",
     justifyContent: "flex-end",
     color: theme.palette.text.secondary
-  },
-  highlight:
-    theme.palette.type === "light"
-      ? {
-          color: theme.palette.secondary.main
-        }
-      : {
-          color: theme.palette.text.primary
-        }
+  }
 });
 
 class FlipToolbars extends BrickBase {
   render() {
-    const { wrapper, toolbars, classes } = this.props;
+    const { wrapper, toolbars, classes, selectedToolbar } = this.props;
     const Wrapper = wrapper || Toolbar;
     return (
-      <Wrapper
-        className={classNames(classes.root, {
-          [classes.highlight]: this.state.highlight
-        })}
-      >
+      <Wrapper className={classes.root}>
         <SelectedToolbar
-          toolbar={toolbars[this.state.selectedToolbar]}
-          pos={this.state.selectedToolbar}
+          toolbar={toolbars[selectedToolbar]}
+          selectedToolbar={selectedToolbar}
           handlers={this.handlers}
           params={this.state}
         />
@@ -94,10 +80,14 @@ class FlipToolbars extends BrickBase {
     );
   }
 }
+FlipToolbars.defaultProps = {
+  selectedToolbar: 0
+};
 FlipToolbars.propTypes = {
   classes: PropTypes.object.isRequired,
   toolbars: PropTypes.array.isRequired,
   wrapper: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+  selectedToolbar: PropTypes.number.isRequired,
   handlers: PropTypes.object, // {local: [], parent: []}
   initState: PropTypes.object //init state
 };

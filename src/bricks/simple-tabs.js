@@ -44,8 +44,7 @@ class SimpleTabs extends React.Component {
   };
 
   render() {
-    const { tabs, withClasses } = this.props;
-    const classes = Object.assign(this.props.classes, withClasses);
+    const { tabs, classes } = this.props;
     const { value } = this.state;
     return (
       <div className={classes.root}>
@@ -71,8 +70,7 @@ class SimpleTabs extends React.Component {
 
 SimpleTabs.propTypes = {
   classes: PropTypes.object.isRequired,
-  tabs: PropTypes.array.isRequired,
-  withClasses: PropTypes.object
+  tabs: PropTypes.array.isRequired
 };
 
 export default withStyles(styles)(SimpleTabs);

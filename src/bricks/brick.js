@@ -17,7 +17,7 @@ function loadBrick(brick) {
 class BrickBase extends React.Component {
   constructor(props) {
     super(props);
-    //let brickName = this.__proto__.constructor.name;
+    let brickName = this.__proto__.constructor.name;
     this.handlers = {};
     let parentHandlers = this.props.handlers.parent || [];
     parentHandlers.map(f => {

@@ -26,10 +26,7 @@ let sampleTabs = [
   }
 ];
 
-const styles = theme => ({});
-function BrickDemo(props) {
-  return (
-    <SimpleTabs withClasses={props.classes} styles={styles} tabs={sampleTabs} />
-  );
+function SimpleTabsDemo(props) {
+  return <SimpleTabs tabs={sampleTabs} />;
 }
-export default withStyles(styles)(BrickDemo);
+export default SimpleTabsDemo;

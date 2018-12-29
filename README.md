@@ -2,10 +2,11 @@
 
 ## Brick Construction
 
-- Inner State
-- Props
-  - Local Handlers Dealing with local state
-  - Messaging Handlers Transfer event to handlers defined in parents
-- Derived State Local state can updated by both local handler and parent event
-
-Instantiation of childrend which may call parent handlers should be done in parent.
+- initState // Be careful to avoiding "anti-pattern" in Derived State:
+  // . Local state only initialized not updated by initState,
+  // . initState should be immutable.
+- bricks // configurable children
+- handlers
+  - local // will bound with component
+  - parentNames // passed parent handlers
+- fromState // mapping state to child brick props

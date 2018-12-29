@@ -55,12 +55,31 @@ let sampleColumns = [
   { id: "carbs", numeric: true, disablePadding: false, label: "Carbs (g)" },
   { id: "protein", numeric: true, disablePadding: false, label: "Protein (g)" }
 ];
+const sampleInitState = {
+  hasCheckBox: false,
+  hightlight: false,
+  selectedRows: [],
+  selectedToolbar: 0,
+  message: { text: "", highlight: false }
+};
 const sampleTopLevelHandlers = [
-  function toggleHighlight() {
-    this.setState({ highlight: !this.state.highlight });
+  function updateSelectedRows(rows) {
+    let rowsCnt = rows.length;
+    let message = "";
+    if (rowsCnt > 1) {
+      message = `${rows.length} rows have been selected`;
+    } else if (rowsCnt > 0) {
+      message = "1 row has been selected";
+    }
+    this.setState({
+      selectedRows: rows,
+      highlight: rowsCnt > 0,
+      message: { text: message, highlight: true },
+      selectedToolbar: rowsCnt > 0 ? 1 : 0
+    });
   },
-  function getHighlight() {
-    return this.state.hightlight;
+  function getSelectedRows() {
+    return this.state.selectedRows;
   },
   function toggleCheckBox() {
     this.setState({ hasCheckBox: !this.state.hasCheckBox });
@@ -74,10 +93,6 @@ const sampleTableHandlers = [
     props.handlers.toggleHighlight();
   }
 ];
-const sampleInitState = {
-  hasCheckBox: false,
-  highlight: false
-};
 const sampleTableInitState = {
   order: "asc",
   orderBy: "calories",
@@ -87,12 +102,7 @@ const sampleTableInitState = {
   pageSize: 5
 };
 // sample data for toolbar
-const sampleToolbarInitState = {
-  hightlight: false,
-  selectedRows: 0,
-  selectedToolbar: 0,
-  message: ""
-};
+const sampleToolbarInitState = {};
 const sampleToolbarHandlers = [
   function flipTo(idx, options) {
     if (idx === 1) {
@@ -125,7 +135,6 @@ const sampleToolbarHandlers = [
   },
   function download(evt, props) {
     this.setState({ message: "Downloading ..." });
-    console.log(props);
   },
   function deletion(evt, props) {
     let message = "Please select rows you want to delete.";
@@ -146,14 +155,6 @@ const sampleToolbars = [
   {
     name: "default",
     elements: [
-      {
-        type: "dynamic-text",
-        content: params => `${params.message || ""}`,
-        wrapper: "span",
-        props: {
-          style: { paddingRight: "1em" }
-        }
-      },
       {
         type: "icon-button",
         title: "Download",
@@ -215,17 +216,7 @@ const toolbarStyles = theme => ({
     flex: "1 1 auto",
     justifyContent: "flex-end",
     paddingRight: 0
-  },
-  highlight:
-    theme.palette.type === "light"
-      ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85)
-        }
-      : {
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark
-        }
+  }
 });
 
 const SAMPLE_DATA = {
@@ -249,7 +240,7 @@ const SAMPLE_DATA = {
         },
         handlers: {
           local: sampleTableHandlers,
-          parentNames: ["toggleHighlight", "getHighlight"]
+          parentNames: ["updateSelectedRows"]
         }
       }
     },
@@ -261,9 +252,13 @@ const SAMPLE_DATA = {
         toolbars: sampleToolbars,
         wrapper: Toolbar,
         styles: toolbarStyles,
+        fromState: {
+          selectedRows: "selectedRows",
+          selectedToolbar: "selectedToolbar"
+        },
         handlers: {
           local: sampleToolbarHandlers,
-          parentNames: ["toggleCheckBox", "getHasCheckBox"] // names only, will be loaded with bound function
+          parentNames: ["toggleCheckBox", "getHasCheckBox", "getSelectedRows"] // names only, will be loaded with bound function
         },
         initState: sampleToolbarInitState
       }
@@ -271,10 +266,9 @@ const SAMPLE_DATA = {
   ]
 };
 
-function BrickDemo(props) {
+function TableWithToolbarDemo(props) {
   return (
     <TableWithToolbar
-      withClasses={props.classes}
       title={"Table With Toolbar Demo"}
       bricks={SAMPLE_DATA.bricks}
       handlers={SAMPLE_DATA.handlers}
@@ -282,4 +276,4 @@ function BrickDemo(props) {
     />
   );
 }
-export default withStyles(tableStyles)(BrickDemo);
+export default TableWithToolbarDemo;

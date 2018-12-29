@@ -136,16 +136,16 @@ class SortedTable extends BrickBase {
     this.setState({ order, orderBy });
   };
 
-  handleSelectAllClick = event => {
-    if (event.target.checked) {
-      this.setState(state => ({
-        selected: state.data.map(n => n.id),
-        message: `${state.data.length} selected`,
-        highlight: true
-      }));
-      return;
+  parentHandler = (handlerName, params) => {
+    if (this.handlers[handlerName]) {
+      this.handlers[handlerName].call(null, params);
     }
-    this.setState({ selected: [], message: "", highlight: false });
+  };
+
+  handleSelectAllClick = event => {
+    let selected = event.target.checked ? this.state.data.map(n => n.id) : [];
+    this.parentHandler("updateSelectedRows", selected);
+    this.setState({ selected: selected });
   };
 
   handleClick = (event, id) => {
@@ -165,12 +165,10 @@ class SortedTable extends BrickBase {
         selected.slice(selectedIndex + 1)
       );
     }
-    let message =
-      newSelected.length > 0 ? `${newSelected.length} selected` : "";
+    this.parentHandler("updateSelectedRows", newSelected);
+
     this.setState({
-      selected: newSelected,
-      highlight: newSelected.length > 0 ? true : false,
-      message: message
+      selected: newSelected
     });
   };
 
@@ -224,10 +222,18 @@ class SortedTable extends BrickBase {
                     <TableCell component="th" scope="row" padding="none">
                       {n.name}
                     </TableCell>
-                    <TableCell numeric>{n.calories}</TableCell>
-                    <TableCell numeric>{n.fat}</TableCell>
-                    <TableCell numeric>{n.carbs}</TableCell>
-                    <TableCell numeric>{n.protein}</TableCell>
+                    {Object.keys(n).map((k, idx) => {
+                      if (k !== "name" && k !== "id") {
+                        return (
+                          <TableCell
+                            numeric={columns[idx - 1].numeric}
+                            key={n.id + "-" + k}
+                          >
+                            {n[k]}
+                          </TableCell>
+                        );
+                      }
+                    })}
                   </TableRow>
                 );
               })}
