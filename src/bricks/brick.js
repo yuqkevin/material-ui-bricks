@@ -17,8 +17,13 @@ function loadBrick(brick) {
 class BrickBase extends React.Component {
   constructor(props) {
     super(props);
-    let brickName = this.__proto__.constructor.name;
+    //let brickName = this.__proto__.constructor.name;
+    // 1. set handlers dictionary: this.handlers . (key => function)
+    // 2. set parent handlers in definition with handler functions (in definition data)
+    // 3. load child bricks  (this.bricks)
     this.handlers = {};
+    this.bricks = {};
+    // handlers: add parent without "bound" prefix, bounding local
     let parentHandlers = this.props.handlers.parent || [];
     parentHandlers.map(f => {
       if (typeof f === "function") {
@@ -30,9 +35,8 @@ class BrickBase extends React.Component {
     let localHandlers = this.props.handlers.local || [];
     localHandlers.map(f => (this.handlers[f.name] = f.bind(this)));
     this.state = props.initState;
-    // pre-load sub-bricks
+    // load sub-bricks
     let bricks = props.bricks || [];
-    this.bricks = {};
     bricks.map(brick => {
       if (brick.data.handlers && brick.data.handlers.parentNames) {
         let parentHandlers = [];
