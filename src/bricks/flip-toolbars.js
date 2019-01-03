@@ -61,6 +61,7 @@ FlipToolbars.defaultProps = {
 FlipToolbars.propTypes = {
   classes: PropTypes.object.isRequired,
   wrapper: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+  toolbars: PropTypes.array.isRequired,
   selectedToolbar: PropTypes.number.isRequired,
   handlers: PropTypes.object, // {local: [], parent: []}
   initState: PropTypes.object //init state

@@ -93,7 +93,7 @@ class BrickDemo extends React.Component {
     this.flipTo = flipTo.bind(this);
   }
   render() {
-    const sampleProps = {
+    const SAMPLE_DATA = {
       wrapper: Toolbar,
       toolbars: sampleToolbars,
       selectedToolbar: this.state.selectedToolbar,
@@ -103,7 +103,7 @@ class BrickDemo extends React.Component {
       },
       styles: styles
     };
-    return <FlipToolbar {...sampleProps} />;
+    return <FlipToolbar {...SAMPLE_DATA} />;
   }
 }
 export default BrickDemo;
