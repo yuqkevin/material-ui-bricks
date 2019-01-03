@@ -80,3 +80,28 @@ export function IconButtonWithTooltip(props) {
     </Tooltip>
   );
 }
+
+// tools for UI definition
+export function iconButton(title, ItemIcon, handler) {
+  return {
+    title,
+    type: "icon-button",
+    icon: ItemIcon,
+    events: [
+      {
+        trigger: "onClick",
+        handler
+      }
+    ]
+  };
+}
+export function textBox(wrapper = "span") {
+  return {
+    type: "text-box",
+    wrapper,
+    content: function() {
+      return this.state.message;
+    },
+    style: { paddingRight: "1em" }
+  };
+}

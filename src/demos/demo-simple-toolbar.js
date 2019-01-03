@@ -6,31 +6,9 @@ import { withStyles } from "@material-ui/core/styles";
 import { lighten } from "@material-ui/core/styles/colorManipulator";
 
 import SimpleToolbar from "../bricks/simple-toolbar";
+import { iconButton, textBox } from "../bricks/materials";
 
 // Sample data
-function iconButton(title, ItemIcon, handler) {
-  return {
-    title,
-    type: "icon-button",
-    icon: ItemIcon,
-    events: [
-      {
-        trigger: "onClick",
-        handler
-      }
-    ]
-  };
-}
-function textBox(wrapper = "span") {
-  return {
-    type: "text-box",
-    wrapper,
-    content: function() {
-      return this.state.message;
-    },
-    style: { paddingRight: "1em" }
-  };
-}
 const sampleToolbarItems = [
   textBox(),
   iconButton("Say Hi", <FilterListIcon />, "sayHi"),
