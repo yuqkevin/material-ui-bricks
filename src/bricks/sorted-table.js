@@ -145,11 +145,10 @@ class SortedTable extends BrickBase {
   handleSelectAllClick = event => {
     let selected = event.target.checked ? this.state.data.map(n => n.id) : [];
     this.parentHandler("updateSelectedRows", selected);
-    this.setState({ selected: selected });
   };
 
   handleClick = (event, id) => {
-    const { selected } = this.state;
+    const selected = this.props.selectedRows;
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
 
@@ -166,10 +165,6 @@ class SortedTable extends BrickBase {
       );
     }
     this.parentHandler("updateSelectedRows", newSelected);
-
-    this.setState({
-      selected: newSelected
-    });
   };
 
   handleChangePage = (event, page) => {
@@ -180,12 +175,12 @@ class SortedTable extends BrickBase {
     this.setState({ pageSize: event.target.value });
   };
 
-  isSelected = id => this.state.selected.indexOf(id) !== -1;
+  isSelected = id => this.props.selectedRows.indexOf(id) !== -1;
 
   render() {
-    const { classes, table, hasCheckBox } = this.props;
+    const { classes, table, hasCheckBox, selectedRows } = this.props;
     const { columns, rows } = table;
-    const { data, order, orderBy, selected, pageSize, page } = this.state;
+    const { data, order, orderBy, pageSize, page } = this.state;
     const emptyRows =
       pageSize - Math.min(pageSize, data.length - page * pageSize);
     return (
@@ -194,7 +189,7 @@ class SortedTable extends BrickBase {
           <EnhancedTableHead
             columns={columns}
             hasCheckBox={hasCheckBox}
-            numSelected={selected.length}
+            numSelected={selectedRows.length}
             order={order}
             orderBy={orderBy}
             onSelectAllClick={this.handleSelectAllClick}
@@ -280,6 +275,7 @@ SortedTable.propTypes = {
   classes: PropTypes.object.isRequired,
   table: PropTypes.object.isRequired,
   hasCheckBox: PropTypes.bool.isRequired,
+  selectedRows: PropTypes.array,
   bricks: PropTypes.array,
   handlers: PropTypes.object, // {local: [], parent: []}
   initState: PropTypes.object //init state

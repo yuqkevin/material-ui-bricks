@@ -17,43 +17,12 @@
  **/
 
 import React from "react";
-import classNames from "classnames";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Toolbar from "@material-ui/core/Toolbar";
-import { IconButtonWithTooltip, Textbar } from "./materials";
-import BrickBase from "./brick";
 
-function SelectedToolbar(props) {
-  const toolbar = props.toolbar;
-  return (
-    <div>
-      {toolbar.elements.map((item, idx) => {
-        let key = "flip-toolbar-" + props.pos + "-" + idx;
-        switch (item.type) {
-          case "icon-button":
-            return (
-              <IconButtonWithTooltip
-                button={item}
-                handlers={props.handlers}
-                key={key}
-              />
-            );
-          case "dynamic-text":
-            return (
-              <Textbar
-                content={props.message}
-                key={key}
-                wrapper={item.wrapper}
-              />
-            );
-          default:
-            return <div key={key}>Unknown Item type {item.type}</div>;
-        }
-      })}
-    </div>
-  );
-}
+import SimpleToolbar from "./simple-toolbar";
+import BrickBase from "./brick";
 
 const styles = theme => ({
   root: {
@@ -66,15 +35,21 @@ const styles = theme => ({
 
 class FlipToolbars extends BrickBase {
   render() {
-    const { wrapper, toolbars, classes, selectedToolbar } = this.props;
+    const {
+      wrapper,
+      handlers,
+      toolbars,
+      classes,
+      selectedToolbar
+    } = this.props;
     const Wrapper = wrapper || Toolbar;
+    const toolbar = toolbars[selectedToolbar];
     return (
       <Wrapper className={classes.root}>
-        <SelectedToolbar
-          toolbar={toolbars[selectedToolbar]}
-          selectedToolbar={selectedToolbar}
-          handlers={this.handlers}
-          params={this.state}
+        <SimpleToolbar
+          items={toolbar.items}
+          handlers={handlers}
+          initState={{ message: "" }}
         />
       </Wrapper>
     );
@@ -85,7 +60,6 @@ FlipToolbars.defaultProps = {
 };
 FlipToolbars.propTypes = {
   classes: PropTypes.object.isRequired,
-  toolbars: PropTypes.array.isRequired,
   wrapper: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
   selectedToolbar: PropTypes.number.isRequired,
   handlers: PropTypes.object, // {local: [], parent: []}

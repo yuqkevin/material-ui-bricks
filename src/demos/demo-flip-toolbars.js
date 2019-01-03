@@ -26,130 +26,70 @@ import { lighten } from "@material-ui/core/styles/colorManipulator";
 import FlipToolbar from "../bricks/flip-toolbars";
 
 // Sample data
+function iconButton(title, ItemIcon, handler) {
+  return {
+    title,
+    type: "icon-button",
+    icon: ItemIcon,
+    events: [
+      {
+        trigger: "onClick",
+        handler
+      }
+    ]
+  };
+}
+function textBox(wrapper = "span") {
+  return {
+    type: "text-box",
+    wrapper,
+    content: function() {
+      return this.state.message;
+    },
+    style: { paddingRight: "1em" }
+  };
+}
 const sampleToolbars = [
   {
     name: "default",
-    elements: [
-      {
-        type: "dynamic-text",
-        content: params => `${params.message || ""}`,
-        wrapper: "span",
-        props: {
-          style: { paddingRight: "1em" }
-        }
-      },
-      {
-        type: "icon-button",
-        icon: <FilterListIcon />,
-        title: "Select Rows",
-        events: [
-          {
-            trigger: "onClick",
-            handler: "sayHi"
-          }
-        ]
-      },
-      {
-        type: "icon-button",
-        icon: <DeleteIcon />,
-        title: "Delete",
-        events: [
-          {
-            trigger: "onClick",
-            handler: "flipTo",
-            args: [1]
-          }
-        ]
-      }
+    items: [
+      textBox(),
+      iconButton("Say Hi", <FilterListIcon />, "sayHi"),
+      iconButton("To Deletion Bar", <DeleteIcon />, "toDelete")
     ]
   },
   {
     name: "deletion",
-    elements: [
-      {
-        type: "dynamic-text",
-        content: params => `${params.selectedRows} rows selected`,
-        wrapper: "span",
-        props: {
-          style: { paddingRight: "1em" }
-        },
-        events: [
-          {
-            trigger: "onClick",
-            handler: "flipTo",
-            args: [0]
-          }
-        ]
-      },
-      {
-        type: "icon-button",
-        icon: <DeleteIcon />,
-        title: "Delete",
-        events: [
-          {
-            trigger: "onClick",
-            handler: "flipTo",
-            args: [0]
-          }
-        ]
-      },
-      {
-        type: "icon-button",
-        icon: <BorderColorIcon />,
-        title: "Edit content",
-        events: [
-          {
-            trigger: "onClick",
-            handler: "alertFlip"
-          }
-        ]
-      }
+    items: [
+      textBox(),
+      iconButton("Say Hi", <DeleteIcon />, "doDelete"),
+      iconButton("To Deletion Bar", <BorderColorIcon />, "cancelDelete")
     ]
   }
 ];
+
 const sampleHandlers = [
-  function flipTo(idx) {
-    if (idx === 1) {
-      let message = "";
-      if (this.state.selectedRows === 0) {
-        message = "No row selected";
-      }
-      this.setState({ selectedToolbar: idx, message });
-    } else {
-      this.setState({
-        selectedToolbar: idx,
-        selectedRows: 0,
-        message: `Thanks #${this.state.selectedToolbar}!`
-      });
-    }
+  function toDelete() {
+    this.handlers.flipTo(1);
+    this.setState({ message: "Delete or Cancel?" });
   },
-  function sayHi(evt, props) {
-    this.setState({
-      message: `Hi ${props.button.title}!, 5 rows have been selected.`,
-      selectedRows: 5
-    });
-  },
-  function alertFlip(evt, props) {
-    alert("trigger customer handler and call built-in handler");
+  function doDelete() {
     this.handlers.flipTo(0);
+    this.setState({ message: "Deleted" });
+  },
+  function cancelDelete() {
+    this.handlers.flipTo(0);
+    this.setState({ message: "Cancelled" });
+  },
+  function sayHi() {
+    this.setState({ message: this.state.message.length > 0 ? "" : "Hi" });
   }
 ];
+
 const sampleInitStates = {
-  eventSource: "local",
-  selectedRows: 0,
-  selectedToolbar: 0,
-  highlight: false,
   message: ""
 };
 // end of sample data
-
-// Definition
-const SampleProps = {
-  toolbars: sampleToolbars,
-  wrapper: Toolbar, // to use HTML DOM as wrapper, it can be string like "div",
-  handlers: { local: sampleHandlers },
-  initState: sampleInitStates
-};
 
 const styles = theme => ({
   highlight:
@@ -164,7 +104,28 @@ const styles = theme => ({
         }
 });
 
-function BrickDemo(props) {
-  return <FlipToolbar {...SampleProps} />;
+function flipTo(selectedToolbar) {
+  console.log("flipto:", selectedToolbar);
+  this.setState({ selectedToolbar: selectedToolbar });
 }
-export default withStyles(styles)(BrickDemo);
+class BrickDemo extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = sampleInitStates;
+    this.flipTo = flipTo.bind(this);
+  }
+  render() {
+    const sampleProps = {
+      wrapper: Toolbar,
+      toolbars: sampleToolbars,
+      selectedToolbar: this.state.selectedToolbar,
+      handlers: {
+        local: sampleHandlers,
+        parent: [this.flipTo]
+      },
+      styles: styles
+    };
+    return <FlipToolbar {...sampleProps} />;
+  }
+}
+export default BrickDemo;

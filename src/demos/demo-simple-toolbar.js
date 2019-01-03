@@ -8,48 +8,42 @@ import { lighten } from "@material-ui/core/styles/colorManipulator";
 import SimpleToolbar from "../bricks/simple-toolbar";
 
 // Sample data
-const sampleToolbarItems = [
-  {
+function iconButton(title, ItemIcon, handler) {
+  return {
+    title,
+    type: "icon-button",
+    icon: ItemIcon,
+    events: [
+      {
+        trigger: "onClick",
+        handler
+      }
+    ]
+  };
+}
+function textBox(wrapper = "span") {
+  return {
     type: "text-box",
+    wrapper,
     content: function() {
-      return `${this.state.message}`;
+      return this.state.message;
     },
-    wrapper: "span",
-    props: {
-      style: { paddingRight: "1em" }
-    }
-  },
-  {
-    type: "icon-button",
-    icon: <FilterListIcon />,
-    title: "Select Rows",
-    events: [
-      {
-        trigger: "onClick",
-        handler: "sayHi"
-      }
-    ]
-  },
-  {
-    type: "icon-button",
-    icon: <DeleteIcon />,
-    title: "Delete",
-    events: [
-      {
-        trigger: "onClick",
-        handler: "deleteMessage"
-      }
-    ]
-  }
+    style: { paddingRight: "1em" }
+  };
+}
+const sampleToolbarItems = [
+  textBox(),
+  iconButton("Say Hi", <FilterListIcon />, "sayHi"),
+  iconButton("To Deletion", <DeleteIcon />, "deleteMessage")
 ];
 
 const sampleHandlers = [
   function sayHi() {
-    this.setState({ message: "Hello" });
+    this.setState({ message: this.state.message ? "" : "Hello" });
   },
   function deleteMessage() {
-    if (window.confirm("Reset message?")) {
-      this.setState({ message: "" });
+    if (window.confirm("Delete?")) {
+      this.setState({ message: "Deleted" });
     }
   }
 ];

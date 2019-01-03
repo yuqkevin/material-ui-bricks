@@ -22,6 +22,29 @@ import { lighten } from "@material-ui/core/styles/colorManipulator";
 import TableWithToolbar from "../bricks/table-with-toolbar";
 
 // Sample data for table
+function iconButton(title, ItemIcon, handler) {
+  return {
+    title,
+    type: "icon-button",
+    icon: ItemIcon,
+    events: [
+      {
+        trigger: "onClick",
+        handler
+      }
+    ]
+  };
+}
+function textBox(wrapper = "span") {
+  return {
+    type: "text-box",
+    wrapper,
+    content: function() {
+      return this.state.message;
+    },
+    style: { paddingRight: "1em" }
+  };
+}
 let counter = 0;
 function createData(name, calories, fat, carbs, protein) {
   counter += 1;
@@ -65,16 +88,19 @@ const sampleInitState = {
 const sampleTopLevelHandlers = [
   function updateSelectedRows(rows) {
     let rowsCnt = rows.length;
-    let message = "";
+    let message = "No row selected";
+    let highlight = true;
     if (rowsCnt > 1) {
       message = `${rows.length} rows have been selected`;
     } else if (rowsCnt > 0) {
       message = "1 row has been selected";
+    } else {
+      highlight = false;
     }
     this.setState({
       selectedRows: rows,
       highlight: rowsCnt > 0,
-      message: { text: message, highlight: true },
+      message: { text: message, highlight },
       selectedToolbar: rowsCnt > 0 ? 1 : 0
     });
   },
@@ -82,10 +108,25 @@ const sampleTopLevelHandlers = [
     return this.state.selectedRows;
   },
   function toggleCheckBox() {
-    this.setState({ hasCheckBox: !this.state.hasCheckBox });
+    let message = this.state.hasCheckBox ? "" : "Please select rows to delete.";
+    this.setState({
+      hasCheckBox: !this.state.hasCheckBox,
+      message,
+      selectedRows: [],
+      selectedToolbar: this.state.hasCheckBox ? 0 : this.selectedToolbar
+    });
   },
   function getHasCheckBox() {
     return this.state.hasCheckBox;
+  },
+  function deleteSelectedRows() {
+    console.log("Do deletion here");
+    this.setState({
+      hasCheckBox: false,
+      selectedRows: [],
+      selectedToolbar: 0,
+      message: `${this.state.selectedRows.length} rows have been deleted.`
+    });
   }
 ];
 const sampleTableHandlers = [
@@ -96,7 +137,6 @@ const sampleTableHandlers = [
 const sampleTableInitState = {
   order: "asc",
   orderBy: "calories",
-  selected: [],
   data: sampleRows,
   page: 0,
   pageSize: 5
@@ -104,106 +144,37 @@ const sampleTableInitState = {
 // sample data for toolbar
 const sampleToolbarInitState = {};
 const sampleToolbarHandlers = [
-  function flipTo(idx, options) {
-    if (idx === 1) {
-      let message = "";
-      if (this.state.selectedRows === 0) {
-        message = "No row selected";
-      } else {
-        if (this.state.selectedRows > 1) {
-          message = `${this.state.selectedRows} rows have been selected`;
-        } else {
-          message = `${this.state.selectedRows} row has been selected`;
-        }
-        this.setState({ selectedToolbar: idx, message });
-      }
-    } else {
-      let message = "";
-      if (options.action === "DeleteGo") {
-        if (this.state.selectedRows > 1) {
-          message = `${this.state.selectedRows} rows have been deleted.`;
-        } else if (this.state.selectedRows > 0) {
-          message = `${this.state.selectedRows} row has been deleted.`;
-        }
-      }
-      this.setState({
-        selectedToolbar: idx,
-        selectedRows: 0,
-        message: message
-      });
-    }
-  },
-  function download(evt, props) {
+  function download() {
     this.setState({ message: "Downloading ..." });
   },
-  function deletion(evt, props) {
+  function deletion() {
     let message = "Please select rows you want to delete.";
-    if (props.handlers.getHasCheckBox()) {
+    if (this.handlers.getHasCheckBox()) {
       message = "";
     }
     this.setState({ message });
-    props.handlers.toggleCheckBox();
+    this.handlers.toggleCheckBox();
   },
-  function deleteGo(evt, props) {
-    this.handlers.flipTo(0, { action: "DeleteGo" });
+  function deleteGo() {
+    this.handlers.deleteSelectedRows();
   },
-  function cancel(evt, props) {
-    this.handlers.flipTo(0, { action: "Cancel" });
+  function cancel() {
+    this.handlers.toggleCheckBox();
   }
 ];
 const sampleToolbars = [
   {
     name: "default",
-    elements: [
-      {
-        type: "icon-button",
-        title: "Download",
-        icon: <DownloadIcon />,
-        events: [
-          {
-            trigger: "onClick",
-            handler: "download"
-          }
-        ]
-      },
-      {
-        type: "icon-button",
-        title: "Delete",
-        icon: <DeleteIcon />,
-        events: [
-          {
-            trigger: "onClick",
-            handler: "deletion"
-          }
-        ]
-      }
+    items: [
+      iconButton("Download", <DownloadIcon />, "download"),
+      iconButton("To Delete", <DeleteIcon />, "deletion")
     ]
   },
   {
     name: "deletion",
-    elements: [
-      {
-        type: "icon-button",
-        title: "DeleteGo",
-        icon: <DeleteGoIcon />,
-        events: [
-          {
-            trigger: "onClick",
-            handler: "deleteGo"
-          }
-        ]
-      },
-      {
-        type: "icon-button",
-        title: "Cancel",
-        icon: <CancelIcon />,
-        events: [
-          {
-            trigger: "onClick",
-            handler: "cancel"
-          }
-        ]
-      }
+    items: [
+      iconButton("Delete", <DeleteGoIcon />, "deleteGo"),
+      iconButton("Cancel", <CancelIcon />, "cancel")
     ]
   }
 ];
@@ -236,7 +207,8 @@ const SAMPLE_DATA = {
         },
         initState: sampleTableInitState,
         fromState: {
-          hasCheckBox: "hasCheckBox" // props_name: state_name
+          hasCheckBox: "hasCheckBox", // props_name: state_name
+          selectedRows: "selectedRows"
         },
         handlers: {
           local: sampleTableHandlers,
@@ -258,7 +230,12 @@ const SAMPLE_DATA = {
         },
         handlers: {
           local: sampleToolbarHandlers,
-          parentNames: ["toggleCheckBox", "getHasCheckBox", "getSelectedRows"] // names only, will be loaded with bound function
+          parentNames: [
+            "toggleCheckBox",
+            "getHasCheckBox",
+            "getSelectedRows",
+            "deleteSelectedRows"
+          ] // names only, will be loaded with bound function
         },
         initState: sampleToolbarInitState
       }

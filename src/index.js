@@ -42,17 +42,14 @@ function pickBrick(brickName) {
 function Toc() {
   return (
     <div>
-      <Button size="small" onClick={() => pickBrick("simple-toolbar")}>
-        Simple Toolbar
-      </Button>
       <Button size="small" onClick={() => pickBrick("simple-tabs")}>
         Simple Tabs
       </Button>
+      <Button size="small" onClick={() => pickBrick("simple-toolbar")}>
+        Simple Toolbar
+      </Button>
       <Button size="small" onClick={() => pickBrick("flip-toolbars")}>
         Flip Toolbars
-      </Button>
-      <Button size="small" onClick={() => pickBrick("simple-table")}>
-        Simple Table
       </Button>
       <Button size="small" onClick={() => pickBrick("table-with-toolbar")}>
         Table With Toolbar
