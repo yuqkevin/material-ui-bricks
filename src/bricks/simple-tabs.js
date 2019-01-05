@@ -43,6 +43,13 @@ class SimpleTabs extends React.Component {
     this.setState({ value });
   };
 
+  tabBodyRender = tabBody => {
+    if (typeof tabBody === "function") {
+      return tabBody();
+    } else {
+      return tabBody;
+    }
+  };
   render() {
     const { tabs, classes } = this.props;
     const { value } = this.state;
@@ -59,7 +66,7 @@ class SimpleTabs extends React.Component {
           (tab, index) =>
             value === index && (
               <TabContainer key={"tab-body-" + index}>
-                {tab.body || tab.render()}
+                {this.tabBodyRender(tab.body)}
               </TabContainer>
             )
         )}

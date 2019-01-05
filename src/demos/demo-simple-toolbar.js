@@ -6,11 +6,11 @@ import { withStyles } from "@material-ui/core/styles";
 import { lighten } from "@material-ui/core/styles/colorManipulator";
 
 import SimpleToolbar from "../bricks/simple-toolbar";
-import { iconButton, textBox } from "../bricks/materials";
+import { iconButton, textBox, getStateFn } from "../bricks/materials";
 
 // Sample data
 const sampleToolbarItems = [
-  textBox(),
+  textBox(getStateFn("message")),
   iconButton("Say Hi", <FilterListIcon />, "sayHi"),
   iconButton("To Deletion", <DeleteIcon />, "deleteMessage")
 ];

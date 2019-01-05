@@ -3,7 +3,7 @@ import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 
-function uiCellIconButton(conf, options) {
+function uiCellIconButton(conf, options = {}) {
   return (
     <Tooltip title={conf.title} {...options}>
       <IconButton aria-label={conf.title}>{conf.icon}</IconButton>
@@ -22,8 +22,8 @@ function uiCellTextBox(conf, options, parentBrick) {
     </Wrapper>
   );
 }
-export function uiCell(conf, options) {
-  let handlers = options.handlers || {};
+export function uiCell(conf, options = {}) {
+  let handlers = options.handlers;
   let opts = { key: options.key };
   if (conf.events) {
     conf.events.map(evt => {
@@ -82,6 +82,16 @@ export function IconButtonWithTooltip(props) {
 }
 
 // tools for UI definition
+export function getPropsFn(name) {
+  return function() {
+    return this.props[name];
+  };
+}
+export function getStateFn(name) {
+  return function() {
+    return this.state[name];
+  };
+}
 export function iconButton(title, ItemIcon, handler) {
   return {
     title,
@@ -95,13 +105,11 @@ export function iconButton(title, ItemIcon, handler) {
     ]
   };
 }
-export function textBox(wrapper = "span") {
+export function textBox(content, wrapper = "span") {
   return {
     type: "text-box",
     wrapper,
-    content: function() {
-      return this.state.message;
-    },
+    content,
     style: { paddingRight: "1em" }
   };
 }

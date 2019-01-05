@@ -24,14 +24,14 @@ import { withStyles } from "@material-ui/core/styles";
 import { lighten } from "@material-ui/core/styles/colorManipulator";
 
 import FlipToolbar from "../bricks/flip-toolbars";
-import { iconButton, textBox } from "../bricks/materials";
+import { iconButton, textBox, getStateFn } from "../bricks/materials";
 
 // Sample data
 const sampleToolbars = [
   {
     name: "default",
     items: [
-      textBox(),
+      textBox(getStateFn("message")),
       iconButton("Say Hi", <FilterListIcon />, "sayHi"),
       iconButton("To Deletion Bar", <DeleteIcon />, "toDelete")
     ]
@@ -39,7 +39,7 @@ const sampleToolbars = [
   {
     name: "deletion",
     items: [
-      textBox(),
+      textBox(getStateFn("message")),
       iconButton("Say Hi", <DeleteIcon />, "doDelete"),
       iconButton("To Deletion Bar", <BorderColorIcon />, "cancelDelete")
     ]
