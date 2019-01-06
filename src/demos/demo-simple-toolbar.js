@@ -1,11 +1,8 @@
 import React from "react";
-import Toolbar from "@material-ui/core/Toolbar";
 import DeleteIcon from "@material-ui/icons/Delete";
 import FilterListIcon from "@material-ui/icons/FilterList";
-import { withStyles } from "@material-ui/core/styles";
-import { lighten } from "@material-ui/core/styles/colorManipulator";
 
-import SimpleToolbar from "../bricks/simple-toolbar";
+import { brickRender } from "../bricks/brick";
 import { iconButton, textBox, getStateFn } from "../bricks/materials";
 
 // Sample data
@@ -28,30 +25,25 @@ const sampleHandlers = [
 const sampleInitStates = {
   message: ""
 };
-// end of sample data
-
-// Definition
-const SampleProps = {
-  items: sampleToolbarItems,
-  wrapper: Toolbar, // to use HTML DOM as wrapper, it can be string like "div",
-  handlers: { local: sampleHandlers },
-  initState: sampleInitStates
-};
 
 const styles = theme => ({
-  highlight:
-    theme.palette.type === "light"
-      ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85)
-        }
-      : {
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark
-        }
+  root: {
+    color: "red"
+  }
 });
+// end of sample data
 
-function BrickDemo(props) {
-  return <SimpleToolbar {...SampleProps} />;
-}
-export default withStyles(styles)(BrickDemo);
+const brickConf = {
+  name: "Toolbar Tab",
+  module: "simple-toolbar",
+  data: {
+    items: sampleToolbarItems,
+    initState: sampleInitStates,
+    handlers: {
+      local: sampleHandlers
+    },
+    styles: styles
+  }
+};
+
+export default brickRender(brickConf);
